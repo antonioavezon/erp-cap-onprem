@@ -50,26 +50,36 @@ Aplicando buenas prácticas de:
 
 ## Puesta en marcha rápida
 
-```bash
+
 # 1. Clonar el repositorio
+```bash
 git clone git@github.com:TU_USUARIO/erp-cap-onprem.git
 cd erp-cap-onprem
+```
 
 # 2. (opcional, fuera de Docker) instalar dependencias
+```bash
 npm install
+```
 
 # 3. Construir imágenes
+```bash
 docker-compose build
+```
 
 # 4. Levantar entorno
+```bash
 docker-compose up
+```
 
 Acceso:
 
-App CAP / servicios: http://localhost:4004
-bash
+App CAP / servicios: 
+```bash
+http://localhost:4004
+```
 
-Estructura del proyecto
+## Estructura del proyecto
 db/         # Modelos CDS (Customer, Product, SalesOrder, SalesOrderItem)
 srv/        # Servicios CAP (CatalogService, SalesService, lógica negocio)
 app/        # UIs Fiori / Fiori Elements
@@ -78,7 +88,7 @@ docker-compose.yml
 README.md
 LICENSE
 
-Roadmap funcional (MVP)
+## Roadmap funcional (MVP)
 
  Sprint 1: Infra CAP + Docker + Postgres operativa
 
@@ -88,7 +98,7 @@ Roadmap funcional (MVP)
 
  Sprint 4: Vistas Fiori y refinamiento
 
-Licencia
+## Licencia
 
 Este proyecto se encuentra bajo licencia MIT.
 Ver archivo LICENSE
@@ -118,3 +128,4 @@ nano README.md   # pegas y editas
 git add README.md
 git commit -m "docs: add project README"
 git push
+```
