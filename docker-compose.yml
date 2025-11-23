@@ -1,0 +1,43 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: erp_db
+    environment:
+      POSTGRES_DB: erpdb
+      POSTGRES_USER: erpuser
+      POSTGRES_PASSWORD: erppass
+    volumes:
+      - erpdb_data:/var/lib/postgresql/data
+    networks:
+      - erpnet
+
+  erp-core:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: erp_core
+    working_dir: /usr/src/app
+    command: ["npm", "start"]
+    depends_on:
+      - db
+    environment:
+      # Tipo de base de datos que CAP debe usar
+      CDS_REQUIRES_DB_KIND: postgres
+
+      # Credenciales que CAP mapeará a cds.requires.db.credentials.*
+      CDS_REQUIRES_DB_CREDENTIALS_HOST: db
+      CDS_REQUIRES_DB_CREDENTIALS_PORT: 5432
+      CDS_REQUIRES_DB_CREDENTIALS_DATABASE: erpdb
+      CDS_REQUIRES_DB_CREDENTIALS_USER: erpuser
+      CDS_REQUIRES_DB_CREDENTIALS_PASSWORD: erppass
+
+    ports:
+      - "4004:4004"
+    networks:
+      - erpnet
+
+networks:
+  erpnet:
+
+volumes:
+  erpdb_data:
