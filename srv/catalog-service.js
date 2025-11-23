@@ -58,16 +58,25 @@ module.exports = cds.service.impl(async function () {
     }
   })
 
-  // 3. ACCIÓN SUBMIT: Validar Stock -> Restar Stock -> Confirmar
+  // 3. ACCIÓN SUBMIT: Validar Vendedor -> Validar Stock -> Restar -> Confirmar
   this.on('submit', SalesOrders, async (req) => {
     const { ID } = req.data
     const tx = cds.transaction(req)
 
-    // A) Verificar que el pedido existe y tiene ítems
+    // A) Leer cabecera para validar Vendedor (NUEVO)
+    const order = await tx.read(SalesOrders, ID)
+    if (!order) return req.error(404, 'Order not found')
+    
+    // [VALIDACIÓN RRHH] ¿Quién vende?
+    if (!order.salesPerson_ID) {
+      return req.error(400, 'No se puede confirmar la venta sin asignar un Vendedor (SalesPerson).')
+    }
+
+    // B) Verificar ítems
     const items = await tx.read(SalesOrderItems).where({ order_ID: ID })
     if (!items.length) return req.error(400, 'Cannot submit empty order')
 
-    // B) Procesar cada ítem (Validar y Restar)
+    // C) Procesar cada ítem
     for (const item of items) {
       const product = await tx.read(Products, item.product_ID)
       
@@ -80,17 +89,18 @@ module.exports = cds.service.impl(async function () {
       const newStock = product.stock - item.quantity
       await tx.update(Products, item.product_ID).with({ stock: newStock })
 
-      // (Opcional) Registrar Movimiento en Kardex
+      // [TRAZABILIDAD] Registrar Movimiento en Kardex ligado al Vendedor
       await tx.create(StockMovements).entries({
         product_ID: item.product_ID,
         type: 'OUT',
         quantity: item.quantity,
-        reference: `Venta ${req.data.orderNo || ID}`,
+        reference: `Venta ${order.orderNo || ID}`,
+        responsible_ID: order.salesPerson_ID, // <--- AQUÍ LIGAMOS AL HUMANO
         date: new Date()
       })
     }
 
-    // C) Cambiar estado
+    // D) Cambiar estado
     await tx.update(SalesOrders, ID).with({ status: 'CONFIRMED' })
     return tx.read(SalesOrders, ID)
   })
@@ -105,7 +115,6 @@ module.exports = cds.service.impl(async function () {
   this.before('CREATE', PurchaseOrderItems, (req) => {
     const { quantity, unitCost } = req.data
     if (!quantity || quantity <= 0) return req.error(400, 'Quantity > 0')
-    // El costo podría ser 0 si es una bonificación, pero validemos que no sea negativo
     if (unitCost < 0) return req.error(400, 'Cost >= 0')
 
     req.data.lineTotal = quantity * unitCost
@@ -129,18 +138,25 @@ module.exports = cds.service.impl(async function () {
     }
   })
 
-  
-
-  // 3. ACCIÓN RECEIVE: Sumar Stock -> Confirmar
+  // 3. ACCIÓN RECEIVE: Validar Comprador -> Sumar Stock -> Confirmar
   this.on('receive', PurchaseOrders, async (req) => {
     const { ID } = req.data
     const tx = cds.transaction(req)
 
-    // A) Verificar ítems
+    // A) Leer cabecera para validar Comprador (NUEVO)
+    const order = await tx.read(PurchaseOrders, ID)
+    if (!order) return req.error(404, 'Order not found')
+
+    // [VALIDACIÓN RRHH] ¿Quién recibe/compra?
+    if (!order.buyer_ID) {
+      return req.error(400, 'No se puede recibir mercadería sin asignar un Responsable (Buyer).')
+    }
+
+    // B) Verificar ítems
     const items = await tx.read(PurchaseOrderItems).where({ order_ID: ID })
     if (!items.length) return req.error(400, 'Cannot receive empty order')
 
-    // B) Procesar entrada de mercadería
+    // C) Procesar entrada
     for (const item of items) {
       const product = await tx.read(Products, item.product_ID)
       
@@ -148,17 +164,18 @@ module.exports = cds.service.impl(async function () {
       const newStock = (product.stock || 0) + item.quantity
       await tx.update(Products, item.product_ID).with({ stock: newStock })
 
-      // Registrar Movimiento en Kardex (Auditoría)
+      // [TRAZABILIDAD] Registrar Movimiento en Kardex ligado al Comprador
       await tx.create(StockMovements).entries({
         product_ID: item.product_ID,
         type: 'IN',
         quantity: item.quantity,
-        reference: `Compra ${req.data.orderNo || ID}`,
+        reference: `Compra ${order.orderNo || ID}`,
+        responsible_ID: order.buyer_ID, // <--- AQUÍ LIGAMOS AL HUMANO
         date: new Date()
       })
     }
 
-    // C) Cambiar estado
+    // D) Cambiar estado
     await tx.update(PurchaseOrders, ID).with({ status: 'RECEIVED' })
     return tx.read(PurchaseOrders, ID)
   })

@@ -1,13 +1,13 @@
 // app/modules/salesorders.js
-// Módulo Pedidos de venta – Versión Profesional
+// Módulo Pedidos de venta – Versión Profesional con RRHH
 
 export const title = 'Pedidos de venta';
 
 const API_ORDERS     = '/catalog/SalesOrders';
 const API_CUSTOMERS  = '/catalog/Customers';
 const API_CURRENCIES = '/catalog/Currencies';
-
-const CSS_PATH = './modules/salesorders.css';
+const API_EMPLOYEES  = '/catalog/Employees'; // <--- NUEVO: Cargar vendedores
+const CSS_PATH       = './modules/salesorders.css';
 
 function loadStyles() {
   if (!document.querySelector(`link[href="${CSS_PATH}"]`)) {
@@ -26,7 +26,9 @@ export function render(host) {
     list: [],
     customers: [],
     currencies: [],
-    custMap: {}, // Mapa ID -> Nombre
+    employees: [], // <--- Lista de personal
+    custMap: {},   // Mapa ID -> Nombre Cliente
+    empMap: {},    // Mapa ID -> Nombre Vendedor
     sortKey: 'orderDate',
     sortDir: 'desc',
     isEditing: false
@@ -56,7 +58,7 @@ export function render(host) {
                 <tr>
                   <th data-sort="orderNo">N° Pedido <span class="sort-icon"></span></th>
                   <th data-sort="customer_ID">Cliente <span class="sort-icon"></span></th>
-                  <th data-sort="orderDate">Fecha <span class="sort-icon"></span></th>
+                  <th data-sort="salesPerson_ID">Vendedor <span class="sort-icon"></span></th> <th data-sort="orderDate">Fecha <span class="sort-icon"></span></th>
                   <th data-sort="status">Estado <span class="sort-icon"></span></th>
                   <th data-sort="totalAmount">Total <span class="sort-icon"></span></th>
                   <th style="width: 110px; text-align:center;">Acciones</th>
@@ -64,7 +66,7 @@ export function render(host) {
               </thead>
               <tbody id="order-table-body">
                 <tr>
-                  <td colspan="6" style="text-align:center; padding:30px; color:#888;">
+                  <td colspan="7" style="text-align:center; padding:30px; color:#888;">
                     Cargando pedidos...
                   </td>
                 </tr>
@@ -91,6 +93,13 @@ export function render(host) {
               <div class="form-group">
                 <label>Fecha *</label>
                 <input name="orderDate" type="date" required />
+              </div>
+
+              <div class="form-group full-width">
+                <label>Vendedor Responsable *</label>
+                <select name="salesPerson_ID" required>
+                  <option value="">Cargando personal...</option>
+                </select>
               </div>
 
               <div class="form-group full-width">
@@ -147,34 +156,44 @@ export function render(host) {
   const formTitle = host.querySelector('#form-title');
   const btnSave = host.querySelector('#btn-save');
   
+  // Selects
   const selCustomer = form.elements.customer_ID;
   const selCurrency = form.elements.currency_code;
+  const selSalesPerson = form.elements.salesPerson_ID; // <--- Ref nuevo select
 
   // ============================================================
   // LÓGICA
   // ============================================================
 
-  // 1. Cargar Datos (Pedidos + Maestros)
+  // 1. Cargar Datos
   async function loadData() {
     try {
-      const [resOrders, resCust, resCurr] = await Promise.all([
+      const [resOrders, resCust, resCurr, resEmp] = await Promise.all([
         fetch(`${API_ORDERS}?$orderby=orderDate desc`),
         fetch(`${API_CUSTOMERS}?$orderby=name asc`),
-        fetch(`${API_CURRENCIES}?$orderby=code asc`)
+        fetch(`${API_CURRENCIES}?$orderby=code asc`),
+        fetch(`${API_EMPLOYEES}?$orderby=lastName asc`)
       ]);
 
       const dOrders = await resOrders.json();
       const dCust = await resCust.json();
       const dCurr = await resCurr.json();
+      const dEmp = await resEmp.json();
 
       state.list = dOrders.value || [];
       state.customers = dCust.value || [];
       state.currencies = dCurr.value || [];
+      state.employees = dEmp.value || [];
 
-      // Mapa rápido de clientes
+      // Mapas rápidos
       state.custMap = {};
       state.customers.forEach(c => {
         state.custMap[c.ID] = c.name || c.taxNumber || 'Sin Nombre';
+      });
+
+      state.empMap = {};
+      state.employees.forEach(e => {
+        state.empMap[e.ID] = `${e.firstName} ${e.lastName}`;
       });
 
       renderTable();
@@ -182,7 +201,7 @@ export function render(host) {
 
     } catch (err) {
       console.error(err);
-      tbody.innerHTML = `<tr><td colspan="6" style="color:red; text-align:center;">Error al cargar datos</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="7" style="color:red; text-align:center;">Error al cargar datos</td></tr>`;
     }
   }
 
@@ -209,7 +228,7 @@ export function render(host) {
 
     if (sortedList.length === 0) {
       tbody.innerHTML = `
-        <tr><td colspan="6" style="text-align:center; padding:40px; color:#888;">
+        <tr><td colspan="7" style="text-align:center; padding:40px; color:#888;">
           No hay pedidos registrados.
         </td></tr>`;
       return;
@@ -217,6 +236,7 @@ export function render(host) {
 
     sortedList.forEach(o => {
       const custName = state.custMap[o.customer_ID] || 'Cliente desconocido';
+      const sellerName = state.empMap[o.salesPerson_ID] || '-'; // Nombre Vendedor
       const dateFmt = formatDate(o.orderDate);
       const totalFmt = o.totalAmount != null 
         ? `${Number(o.totalAmount).toLocaleString('es-CL', { minimumFractionDigits: 2 })} ${o.currency_code}`
@@ -225,17 +245,23 @@ export function render(host) {
       // Estado con colores
       let statusStyle = 'color:#555;';
       if (o.status === 'ABIERTO') statusStyle = 'color:#0056b3; font-weight:bold;';
-      if (o.status === 'CERRADO') statusStyle = 'color:#2e7d32;';
+      if (o.status === 'CONFIRMED') statusStyle = 'color:#2e7d32; font-weight:bold;'; // Status confirmado por submit
+      if (o.status === 'CERRADO') statusStyle = 'color:#555;';
       if (o.status === 'CANCELADO') statusStyle = 'color:#d00;';
 
       const tr = document.createElement('tr');
       tr.innerHTML = `
         <td><strong>${escapeHtml(o.orderNo)}</strong></td>
         <td>${escapeHtml(custName)}</td>
+        <td style="font-size:0.85rem; color:#555;">${escapeHtml(sellerName)}</td>
         <td>${dateFmt}</td>
         <td><span style="${statusStyle}">${escapeHtml(o.status)}</span></td>
         <td style="text-align:right;">${totalFmt}</td>
         <td style="text-align:center;">
+          ${ o.status === 'ABIERTO' 
+             ? `<button class="btn tiny success" data-action="submit" data-id="${o.ID}" title="Confirmar Venta">✔</button>` 
+             : '' 
+          }
           <button class="btn tiny" data-action="edit" data-id="${o.ID}" title="Editar">✏️</button>
           <button class="btn tiny danger" data-action="delete" data-id="${o.ID}" title="Eliminar">🗑️</button>
         </td>
@@ -279,6 +305,16 @@ export function render(host) {
       opt.textContent = `${curr.code} - ${curr.name || ''}`;
       selCurrency.appendChild(opt);
     });
+
+    // Vendedores (Empleados)
+    selSalesPerson.innerHTML = '<option value="">-- Quién vende --</option>';
+    state.employees.forEach(e => {
+      // Filtro opcional: Podríamos filtrar por e.role === 'SALES'
+      const opt = document.createElement('option');
+      opt.value = e.ID;
+      opt.textContent = `${e.firstName} ${e.lastName} (${e.role || 'Staff'})`;
+      selSalesPerson.appendChild(opt);
+    });
   }
 
   // 4. Formulario
@@ -301,9 +337,7 @@ export function render(host) {
       // Default: Hoy
       form.elements.orderDate.value = new Date().toISOString().slice(0, 10);
       form.elements.status.value = 'ABIERTO';
-      // Default Moneda CLP si existe
-      const clp = state.currencies.find(c => c.code === 'CLP');
-      if (clp) form.elements.currency_code.value = 'CLP';
+      if(state.currencies.find(c=>c.code==='CLP')) form.elements.currency_code.value = 'CLP';
     } else {
       formTitle.textContent = 'Editar Pedido';
       btnSave.textContent = 'Guardar Cambios';
@@ -312,6 +346,7 @@ export function render(host) {
       form.elements.id.value = data.ID;
       form.elements.orderNo.value = data.orderNo || '';
       form.elements.customer_ID.value = data.customer_ID || '';
+      form.elements.salesPerson_ID.value = data.salesPerson_ID || ''; // Cargar vendedor
       form.elements.orderDate.value = data.orderDate ? data.orderDate.slice(0,10) : '';
       form.elements.status.value = data.status || 'ABIERTO';
       form.elements.currency_code.value = data.currency_code || '';
@@ -323,10 +358,11 @@ export function render(host) {
   function checkValidity() {
     const hasNo = !!form.elements.orderNo.value.trim();
     const hasCust = !!form.elements.customer_ID.value;
+    const hasSeller = !!form.elements.salesPerson_ID.value; // Validar Vendedor
     const hasDate = !!form.elements.orderDate.value;
     const hasCurr = !!form.elements.currency_code.value;
 
-    if (hasNo && hasCust && hasDate && hasCurr) {
+    if (hasNo && hasCust && hasSeller && hasDate && hasCurr) {
       btnSave.removeAttribute('disabled');
     } else {
       btnSave.setAttribute('disabled', 'true');
@@ -362,6 +398,7 @@ export function render(host) {
     const payload = {
       orderNo: formData.get('orderNo').trim(),
       customer_ID: formData.get('customer_ID'),
+      salesPerson_ID: formData.get('salesPerson_ID'), // Enviar Vendedor
       orderDate: formData.get('orderDate'),
       status: formData.get('status'),
       currency_code: formData.get('currency_code'),
@@ -391,12 +428,22 @@ export function render(host) {
     const action = btn.dataset.action;
     const id = btn.dataset.id;
 
-    if (action === 'edit') {
+    // Acción SUBMIT (Confirmar Venta)
+    if (action === 'submit') {
+      if (confirm('¿Confirmar venta? Se descontará el stock y no podrá editarse.')) {
+        try {
+          await apiSubmitOrder(id);
+          showToast('✅ Venta confirmada y Stock descontado');
+          loadData();
+        } catch (err) { alert('Error: ' + err.message); }
+      }
+    } 
+    else if (action === 'edit') {
       const item = state.list.find(x => x.ID === id);
       if (item) toggleForm(true, 'edit', item);
     } 
     else if (action === 'delete') {
-      if (confirm('¿Eliminar este pedido? Cuidado: podría tener ítems asociados.')) {
+      if (confirm('¿Eliminar este pedido?')) {
         try {
           await apiDelete(id);
           showToast('Pedido eliminado');
@@ -421,7 +468,6 @@ function escapeHtml(text) {
 
 function formatDate(isoDate) {
   if (!isoDate) return '-';
-  // Cortar YYYY-MM-DD
   return isoDate.slice(0, 10);
 }
 
@@ -449,4 +495,17 @@ async function apiUpdate(id, data) {
 async function apiDelete(id) {
   const res = await fetch(`${API_ORDERS}/${id}`, { method: 'DELETE' });
   if (!res.ok) throw new Error(await res.text());
+}
+
+// Acción Bound Submit
+async function apiSubmitOrder(id) {
+  const res = await fetch(`${API_ORDERS}/${id}/CatalogService.submit`, {
+    method: 'POST', 
+    headers: {'Content-Type': 'application/json'}, 
+    body: JSON.stringify({})
+  });
+  if (!res.ok) {
+    const errData = await res.json();
+    throw new Error(errData.error?.message || 'Error al confirmar');
+  }
 }

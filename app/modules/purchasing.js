@@ -3,10 +3,11 @@
 
 export const title = 'Gestión de Compras';
 
-const API_PURCHASE = '/catalog/PurchaseOrders';
-const API_SUPPLIERS = '/catalog/Suppliers';
+const API_PURCHASE   = '/catalog/PurchaseOrders';
+const API_SUPPLIERS  = '/catalog/Suppliers';
 const API_CURRENCIES = '/catalog/Currencies';
-const CSS_PATH = './modules/purchasing.css';
+const API_EMPLOYEES  = '/catalog/Employees'; // <--- NUEVO: Para cargar compradores
+const CSS_PATH       = './modules/purchasing.css';
 
 function loadStyles() {
   if (!document.querySelector(`link[href="${CSS_PATH}"]`)) {
@@ -24,12 +25,15 @@ export function render(host) {
     list: [],
     suppliers: [],
     currencies: [],
+    employees: [], // <--- Lista de personal
     suppMap: {},
+    empMap: {},    // Mapa ID -> Nombre empleado
     sortKey: 'orderDate',
     sortDir: 'desc',
     isEditing: false
   };
 
+  // --- HTML TEMPLATE ---
   host.innerHTML = `
     <div class="pur-module">
       
@@ -49,6 +53,7 @@ export function render(host) {
                 <tr>
                   <th data-sort="orderNo">N° Orden <span class="sort-icon"></span></th>
                   <th data-sort="supplier_ID">Proveedor <span class="sort-icon"></span></th>
+                  <th data-sort="buyer_ID">Comprador <span class="sort-icon"></span></th>
                   <th data-sort="orderDate">Fecha <span class="sort-icon"></span></th>
                   <th data-sort="status">Estado <span class="sort-icon"></span></th>
                   <th data-sort="totalAmount">Total <span class="sort-icon"></span></th>
@@ -56,7 +61,7 @@ export function render(host) {
                 </tr>
               </thead>
               <tbody id="pur-table-body">
-                <tr><td colspan="6" style="text-align:center; padding:30px; color:#888;">Cargando compras...</td></tr>
+                <tr><td colspan="7" style="text-align:center; padding:30px; color:#888;">Cargando compras...</td></tr>
               </tbody>
             </table>
           </div>
@@ -82,9 +87,16 @@ export function render(host) {
               </div>
 
               <div class="form-group full-width">
+                <label>Comprador Responsable *</label>
+                <select name="buyer_ID" required>
+                  <option value="">Cargando personal...</option>
+                </select>
+              </div>
+
+              <div class="form-group full-width">
                 <label>Proveedor *</label>
                 <select name="supplier_ID" required>
-                  <option value="">Cargando...</option>
+                  <option value="">Cargando proveedores...</option>
                 </select>
               </div>
 
@@ -127,35 +139,46 @@ export function render(host) {
   const form = host.querySelector('#pur-form');
   const formTitle = host.querySelector('#form-title');
   const btnSave = host.querySelector('#btn-save');
+  
+  // Referencias a Selects
   const selSupp = form.elements.supplier_ID;
   const selCurr = form.elements.currency_code;
+  const selBuyer = form.elements.buyer_ID; // <--- Referencia al nuevo select
 
-  // --- Lógica ---
+  // --- LÓGICA ---
 
   async function loadData() {
     try {
-      const [resPur, resSup, resCur] = await Promise.all([
+      // Cargar Compras, Proveedores, Monedas y Empleados
+      const [resPur, resSup, resCur, resEmp] = await Promise.all([
         fetch(`${API_PURCHASE}?$orderby=orderDate desc`),
         fetch(`${API_SUPPLIERS}?$orderby=name asc`),
-        fetch(`${API_CURRENCIES}?$orderby=code asc`)
+        fetch(`${API_CURRENCIES}?$orderby=code asc`),
+        fetch(`${API_EMPLOYEES}?$orderby=lastName asc`)
       ]);
 
       const dPur = await resPur.json();
       const dSup = await resSup.json();
       const dCur = await resCur.json();
+      const dEmp = await resEmp.json();
 
       state.list = dPur.value || [];
       state.suppliers = dSup.value || [];
       state.currencies = dCur.value || [];
+      state.employees = dEmp.value || [];
 
+      // Mapas para visualización rápida en tabla
       state.suppMap = {};
       state.suppliers.forEach(s => state.suppMap[s.ID] = s.name);
+      
+      state.empMap = {};
+      state.employees.forEach(e => state.empMap[e.ID] = `${e.firstName} ${e.lastName}`);
 
       renderTable();
       updateSelects();
     } catch (err) {
       console.error(err);
-      tbody.innerHTML = `<tr><td colspan="6" style="color:red; text-align:center;">Error al cargar</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="7" style="color:red; text-align:center;">Error al cargar datos</td></tr>`;
     }
   }
 
@@ -173,12 +196,13 @@ export function render(host) {
 
     tbody.innerHTML = '';
     if (sorted.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:30px; color:#888;">No hay órdenes de compra.</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:30px; color:#888;">No hay órdenes de compra.</td></tr>`;
       return;
     }
 
     sorted.forEach(o => {
       const suppName = state.suppMap[o.supplier_ID] || 'Proveedor desconocido';
+      const buyerName = state.empMap[o.buyer_ID] || 'Sin asignar'; // Mostrar comprador
       const dateFmt = o.orderDate ? o.orderDate.slice(0,10) : '-';
       const totalFmt = o.totalAmount ? `${Number(o.totalAmount).toLocaleString()} ${o.currency_code}` : '-';
       
@@ -196,6 +220,7 @@ export function render(host) {
       tr.innerHTML = `
         <td><strong>${escapeHtml(o.orderNo)}</strong></td>
         <td>${escapeHtml(suppName)}</td>
+        <td style="font-size:0.85rem; color:#555;">${escapeHtml(buyerName)}</td>
         <td>${dateFmt}</td>
         <td><span style="${stStyle}">${escapeHtml(o.status)}</span></td>
         <td style="text-align:right;">${totalFmt}</td>
@@ -224,6 +249,7 @@ export function render(host) {
   }
 
   function updateSelects() {
+    // 1. Proveedores
     selSupp.innerHTML = '<option value="">-- Seleccione Proveedor --</option>';
     state.suppliers.forEach(s => {
       const opt = document.createElement('option');
@@ -231,12 +257,24 @@ export function render(host) {
       opt.textContent = s.name;
       selSupp.appendChild(opt);
     });
+
+    // 2. Monedas
     selCurr.innerHTML = '<option value="">-- Moneda --</option>';
     state.currencies.forEach(c => {
       const opt = document.createElement('option');
       opt.value = c.code;
       opt.textContent = c.code;
       selCurr.appendChild(opt);
+    });
+
+    // 3. Compradores (Empleados)
+    selBuyer.innerHTML = '<option value="">-- Quién compra --</option>';
+    state.employees.forEach(e => {
+      // Filtro opcional: solo mostrar Administrativos o Bodegueros si quisieras
+      const opt = document.createElement('option');
+      opt.value = e.ID;
+      opt.textContent = `${e.firstName} ${e.lastName} (${e.role || 'Staff'})`;
+      selBuyer.appendChild(opt);
     });
   }
 
@@ -253,16 +291,17 @@ export function render(host) {
       form.elements.id.value = '';
       form.elements.orderDate.value = new Date().toISOString().slice(0,10);
       form.elements.status.value = 'CREATED';
-      // Default CLP
       if(state.currencies.find(c=>c.code==='CLP')) form.elements.currency_code.value = 'CLP';
     } else {
       formTitle.textContent = 'Editar Orden';
       btnSave.textContent = 'Guardar Cambios';
       state.isEditing = true;
+      
       form.elements.id.value = data.ID;
       form.elements.orderNo.value = data.orderNo || '';
       form.elements.orderDate.value = data.orderDate ? data.orderDate.slice(0,10) : '';
       form.elements.supplier_ID.value = data.supplier_ID || '';
+      form.elements.buyer_ID.value = data.buyer_ID || ''; // Cargar comprador
       form.elements.status.value = data.status || 'CREATED';
       form.elements.currency_code.value = data.currency_code || '';
       form.elements.totalAmount.value = data.totalAmount || '';
@@ -271,7 +310,11 @@ export function render(host) {
   }
 
   function checkValidity() {
-    if (form.elements.orderNo.value.trim() && form.elements.supplier_ID.value) {
+    const hasNo = !!form.elements.orderNo.value.trim();
+    const hasSupp = !!form.elements.supplier_ID.value;
+    const hasBuyer = !!form.elements.buyer_ID.value; // Validar comprador
+
+    if (hasNo && hasSupp && hasBuyer) {
       btnSave.removeAttribute('disabled');
     } else {
       btnSave.setAttribute('disabled', 'true');
@@ -291,7 +334,10 @@ export function render(host) {
   host.querySelector('#btn-refresh').addEventListener('click', loadData);
   host.querySelector('#btn-new').addEventListener('click', () => toggleForm(true, 'new'));
   host.querySelector('#btn-cancel').addEventListener('click', () => toggleForm(false));
+  
+  // Validar inputs
   form.addEventListener('input', checkValidity);
+  form.addEventListener('change', checkValidity);
 
   form.addEventListener('submit', async (ev) => {
     ev.preventDefault();
@@ -300,7 +346,8 @@ export function render(host) {
       orderNo: formData.get('orderNo').trim(),
       orderDate: formData.get('orderDate'),
       supplier_ID: formData.get('supplier_ID'),
-      status: 'CREATED', // Siempre nace creada
+      buyer_ID: formData.get('buyer_ID'), // Guardar comprador
+      status: 'CREATED', 
       currency_code: formData.get('currency_code'),
       notes: formData.get('notes')
     };
@@ -326,10 +373,10 @@ export function render(host) {
     const id = btn.dataset.id;
 
     if (action === 'receive') {
-      if (confirm('¿Confirmar recepción de mercadería? Esto aumentará el stock.')) {
+      if (confirm('¿Confirmar recepción? Esto aumentará el stock.')) {
         try {
           await apiReceiveOrder(id);
-          showToast('✅ Mercadería recibida y Stock actualizado');
+          showToast('✅ Mercadería recibida');
           loadData();
         } catch (err) { alert('Error: ' + err.message); }
       }
@@ -378,13 +425,12 @@ async function apiDelete(id) {
   if (!res.ok) throw new Error(await res.text());
 }
 
-// ACCIÓN DE NEGOCIO (CAP Action)
+// ACCIÓN DE NEGOCIO
 async function apiReceiveOrder(id) {
-  // Llamada a la acción "bound" receive
   const res = await fetch(`${API_PURCHASE}/${id}/CatalogService.receive`, {
     method: 'POST', 
     headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({}) // Body vacío requerido
+    body: JSON.stringify({}) 
   });
   if (!res.ok) {
     const errData = await res.json();
