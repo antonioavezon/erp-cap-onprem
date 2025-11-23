@@ -8,7 +8,6 @@
 </head>
 <body>
   <div class="shell">
-    <!-- Barra superior -->
     <header class="shell-header">
       <div class="shell-header-left">
         <span class="app-title">ERP CAP On-Prem</span>
@@ -19,9 +18,7 @@
       </div>
     </header>
 
-    <!-- Cuerpo principal -->
     <div class="shell-main">
-      <!-- Menú lateral -->
       <nav class="shell-sidebar">
         <div class="sidebar-logo">
           <span class="logo-circle">E</span>
@@ -59,6 +56,39 @@
         </details>
 
         <details class="nav-group" open>
+          <summary>Compras</summary>
+          <button
+            class="nav-item"
+            data-module="suppliers"
+            type="button"
+          >
+            <span class="nav-item-title">Proveedores</span>
+            <span class="nav-item-sub">Base de proveedores</span>
+          </button>
+
+          <button
+            class="nav-item"
+            data-module="purchasing"
+            type="button"
+          >
+            <span class="nav-item-title">Pedidos de Compra</span>
+            <span class="nav-item-sub">Órdenes y Recepción</span>
+          </button>
+        </details>
+
+        <details class="nav-group" open>
+          <summary>Logística</summary>
+          <button
+            class="nav-item"
+            data-module="inventory"
+            type="button"
+          >
+            <span class="nav-item-title">Inventario</span>
+            <span class="nav-item-sub">Stock y Movimientos</span>
+          </button>
+        </details>
+
+        <details class="nav-group" open>
           <summary>Ventas</summary>
           <button
             class="nav-item"
@@ -92,7 +122,6 @@
         </details>
       </nav>
 
-      <!-- Contenido central -->
       <main class="shell-content">
         <div class="content-header">
           <h1 id="content-title">ERP CAP On-Prem – Módulos</h1>
@@ -105,7 +134,6 @@
           </button>
         </div>
 
-        <!-- Panel de bienvenida -->
         <section id="welcome-panel" class="welcome-panel">
           <p class="welcome-lead">
             Selecciona un módulo funcional en el menú izquierdo para gestionar datos reales
@@ -113,6 +141,7 @@
           </p>
 
           <div class="welcome-grid">
+            
             <article
               class="welcome-card"
               data-module="customers"
@@ -123,7 +152,7 @@
               <h3>Maestro de clientes</h3>
               <p>
                 Alta, modificación y baja de clientes. Datos de contacto, dirección,
-                país y estado activo. Base para análisis de cartera y riesgo.
+                país y estado activo.
               </p>
             </article>
 
@@ -137,7 +166,49 @@
               <h3>Catálogo de productos</h3>
               <p>
                 Gestión de productos, precios, moneda y SKU. Insumo directo para
-                pedidos de venta, márgenes y rentabilidad.
+                ventas y compras.
+              </p>
+            </article>
+
+            <article
+              class="welcome-card"
+              data-module="suppliers"
+              role="button"
+              tabindex="0"
+            >
+              <h2>Proveedores</h2>
+              <h3>Gestión de compras</h3>
+              <p>
+                Registro de socios comerciales para el abastecimiento. Datos fiscales
+                y condiciones de pago.
+              </p>
+            </article>
+
+            <article
+              class="welcome-card"
+              data-module="purchasing"
+              role="button"
+              tabindex="0"
+            >
+              <h2>Pedidos de Compra</h2>
+              <h3>Aprovisionamiento</h3>
+              <p>
+                Creación de órdenes de compra a proveedores y <strong>recepción de mercadería</strong>
+                para aumentar el stock automáticamente.
+              </p>
+            </article>
+
+            <article
+              class="welcome-card"
+              data-module="inventory"
+              role="button"
+              tabindex="0"
+            >
+              <h2>Inventario</h2>
+              <h3>Control de Stock</h3>
+              <p>
+                Visualización de existencias en tiempo real. Historial de movimientos (Kardex)
+                generado por compras y ventas.
               </p>
             </article>
 
@@ -148,10 +219,10 @@
               tabindex="0"
             >
               <h2>Pedidos de venta</h2>
-              <h3>Cabecera e ítems</h3>
+              <h3>Salida de mercadería</h3>
               <p>
-                Registro de pedidos por cliente, fecha, estado, montos totales y
-                detalle de líneas. Mantiene la relación con clientes y productos.
+                Registro de ventas a clientes. Al confirmar un pedido, 
+                el sistema descuenta el stock disponible.
               </p>
             </article>
 
@@ -165,14 +236,12 @@
               <h3>Servicios OData</h3>
               <p>
                 Acceso a metadatos, entidades y enlaces
-                <strong>Fiori preview</strong> generados automáticamente por CAP
-                sobre PostgreSQL.
+                <strong>Fiori preview</strong> generados automáticamente por CAP.
               </p>
             </article>
           </div>
         </section>
 
-        <!-- Panel donde se cargarán los módulos (misma página) -->
         <section
           id="module-panel"
           class="welcome-panel hidden"
@@ -181,7 +250,6 @@
       </main>
     </div>
 
-    <!-- Pie de página -->
     <footer class="shell-footer">
       <span>ERP CAP On-Prem &mdash; Demo educativa</span>
       <span>CAP Node.js &bull; PostgreSQL on Docker &bull; Fiori preview</span>
@@ -190,6 +258,7 @@
 
   <script type="module">
     const moduleRegistry = {
+      // --- MAESTROS ---
       customers: {
         title: 'Clientes',
         loader: () => import('./modules/customers.js')
@@ -198,6 +267,24 @@
         title: 'Productos',
         loader: () => import('./modules/products.js')
       },
+      
+      // --- COMPRAS (NUEVO) ---
+      suppliers: {
+        title: 'Proveedores',
+        loader: () => import('./modules/suppliers.js')
+      },
+      purchasing: {
+        title: 'Gestión de Compras',
+        loader: () => import('./modules/purchasing.js')
+      },
+
+      // --- LOGÍSTICA ---
+      inventory: {
+        title: 'Inventario y Stock',
+        loader: () => import('./modules/inventory.js')
+      },
+
+      // --- VENTAS ---
       salesorders: {
         title: 'Pedidos de venta',
         loader: () => import('./modules/salesorders.js')
@@ -206,9 +293,11 @@
         title: 'Ítems de pedido',
         loader: () => import('./modules/salesitems.js')
       },
+
+      // --- TÉCNICO ---
       catalog: {
         title: 'Vista técnica CAP',
-        loader: () => import('./modules/tech.js') // <--- AQUÍ ESTÁ EL CAMBIO
+        loader: () => import('./modules/tech.js')
       }
     };
 
@@ -251,13 +340,10 @@
       `;
 
       if (!entry.loader) {
-        // Caso especial: catalog sin módulo propio todavía
         modulePanel.innerHTML = `
           <div class="module-placeholder">
             <h2>${entry.title}</h2>
-            <p>
-              Aquí podrías abrir directamente /catalog o el Fiori preview técnico.
-            </p>
+            <p>Este módulo está en construcción o no se ha definido el loader.</p>
           </div>
         `;
         return;
@@ -277,6 +363,7 @@
             <h2>Error al cargar el módulo</h2>
             <p>${entry.title}</p>
             <pre>${err.message}</pre>
+            <p>Verifica que los archivos .js existan (suppliers.js, purchasing.js).</p>
           </div>
         `;
       }
