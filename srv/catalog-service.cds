@@ -3,32 +3,43 @@ using erp from '../db/schema';
 service CatalogService @(path: '/catalog') {
 
   // ---------------------------------------------------------
-  // DATOS MAESTROS
+  // DATOS MAESTROS (Generales)
   // ---------------------------------------------------------
   entity Customers          as projection on erp.Customers;
   entity Products           as projection on erp.Products;
-  entity Suppliers          as projection on erp.Suppliers; // Nuevo: Proveedores
+  entity Suppliers          as projection on erp.Suppliers;
 
   // ---------------------------------------------------------
-  // INVENTARIO Y STOCK
+  // RECURSOS HUMANOS (HR) - NUEVO SPRINT 6
   // ---------------------------------------------------------
-  // Necesario para que tu módulo de Inventario lea el historial
+  // Gestión de personal
+  entity Employees          as projection on erp.Employees;
+  
+  // Datos administrativos
+  entity Contracts          as projection on erp.Contracts;
+  
+  // Finanzas personales
+  entity Payrolls           as projection on erp.Payrolls;
+
+  // ---------------------------------------------------------
+  // INVENTARIO Y LOGÍSTICA
+  // ---------------------------------------------------------
   entity StockMovements     as projection on erp.StockMovements;
 
   // ---------------------------------------------------------
   // VENTAS (Sales)
   // ---------------------------------------------------------
   entity SalesOrders        as projection on erp.SalesOrders actions {
-    action submit(); // Confirma la venta y descuenta stock
+    action submit(); // Confirma venta, descuenta stock
   };
   
   entity SalesOrderItems    as projection on erp.SalesOrderItems;
 
   // ---------------------------------------------------------
-  // COMPRAS (Procurement) - NUEVO
+  // COMPRAS (Procurement)
   // ---------------------------------------------------------
   entity PurchaseOrders     as projection on erp.PurchaseOrders actions {
-    action receive(); // Recibe la mercadería y aumenta stock
+    action receive(); // Recibe mercadería, aumenta stock
   };
 
   entity PurchaseOrderItems as projection on erp.PurchaseOrderItems;

@@ -5,6 +5,7 @@ export const title = 'Inventario y Stock';
 
 const API_PRODUCTS  = '/catalog/Products';
 const API_MOVEMENTS = '/catalog/StockMovements';
+const API_EMPLOYEES = '/catalog/Employees'; // <--- NUEVO: Para cargar responsables
 const CSS_PATH      = './modules/inventory.css';
 
 function loadStyles() {
@@ -22,6 +23,7 @@ export function render(host) {
   // Estado local
   const state = {
     products: [],
+    employees: [], // <--- NUEVO: Lista de empleados
     sortKey: 'name',
     sortDir: 'asc',
     isFormVisible: false
@@ -74,26 +76,33 @@ export function render(host) {
               <div class="form-group">
                 <label>Tipo de Movimiento</label>
                 <select name="type" required>
-                  <option value="IN">⬇️ ENTRADA (Compra)</option>
-                  <option value="OUT">⬆️ SALIDA (Ajuste/Merma)</option>
+                  <option value="IN">⬇️ ENTRADA (Compra/Dev)</option>
+                  <option value="OUT">⬆️ SALIDA (Merma/Ajuste)</option>
                 </select>
               </div>
 
               <div class="form-group">
-                <label>Producto</label>
+                <label>Responsable *</label>
+                <select name="responsible_ID" required>
+                  <option value="">Cargando personal...</option>
+                </select>
+              </div>
+
+              <div class="form-group full-width">
+                <label>Producto *</label>
                 <select name="product_ID" required>
                   <option value="">Cargando productos...</option>
                 </select>
               </div>
 
               <div class="form-group">
-                <label>Cantidad</label>
+                <label>Cantidad *</label>
                 <input name="quantity" type="number" min="1" step="1" required placeholder="0" />
               </div>
 
               <div class="form-group">
-                <label>Referencia / Nota</label>
-                <input name="reference" maxlength="50" placeholder="Ej: Compra Factura 123" required />
+                <label>Referencia / Nota *</label>
+                <input name="reference" maxlength="50" placeholder="Ej: Ajuste inventario" required />
               </div>
 
             </div>
@@ -105,7 +114,7 @@ export function render(host) {
             
             <p style="font-size:0.8rem; color:#666; margin-top:15px; line-height:1.4;">
               <strong>Nota:</strong> Las entradas suman al stock. Las salidas restan. 
-              El cambio se reflejará inmediatamente en el catálogo.
+              El responsable quedará registrado en el historial (Kardex).
             </p>
           </form>
         </section>
@@ -120,27 +129,36 @@ export function render(host) {
   const form = host.querySelector('#inv-form');
   const btnSave = host.querySelector('#btn-save');
   const selProduct = form.elements.product_ID;
+  const selResponsible = form.elements.responsible_ID; // <--- Referencia al nuevo select
 
   // ============================================================
   // LÓGICA
   // ============================================================
 
-  // 1. Cargar Productos
+  // 1. Cargar Productos y Empleados
   async function loadData() {
     try {
-      const res = await fetch(`${API_PRODUCTS}?$orderby=name asc`);
-      const data = await res.json();
-      state.products = data.value || [];
+      // Carga paralela
+      const [resProd, resEmp] = await Promise.all([
+        fetch(`${API_PRODUCTS}?$orderby=name asc`),
+        fetch(`${API_EMPLOYEES}?$orderby=lastName asc`)
+      ]);
+
+      const dataProd = await resProd.json();
+      const dataEmp = await resEmp.json();
+
+      state.products = dataProd.value || [];
+      state.employees = dataEmp.value || [];
       
       renderTable();
-      updateProductSelect();
+      updateSelects(); // <--- Llena ambos selects
     } catch (err) {
       console.error(err);
-      tbody.innerHTML = `<tr><td colspan="5" style="color:red; text-align:center;">Error al cargar inventario</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="5" style="color:red; text-align:center;">Error al cargar datos</td></tr>`;
     }
   }
 
-  // 2. Renderizar Tabla con Colores de Stock
+  // 2. Renderizar Tabla
   function renderTable() {
     const sortedList = [...state.products].sort((a, b) => {
       let valA = a[state.sortKey];
@@ -209,8 +227,10 @@ export function render(host) {
     });
   }
 
-  function updateProductSelect() {
-    const currentVal = selProduct.value;
+  // 3. Llenar Selects (Productos y Responsables)
+  function updateSelects() {
+    // Productos
+    const currentProd = selProduct.value;
     selProduct.innerHTML = '<option value="">-- Seleccionar Producto --</option>';
     state.products.forEach(p => {
       const opt = document.createElement('option');
@@ -218,10 +238,29 @@ export function render(host) {
       opt.textContent = `${p.name} (Stock: ${p.stock || 0})`;
       selProduct.appendChild(opt);
     });
-    selProduct.value = currentVal;
+    selProduct.value = currentProd;
+
+    // Responsables (Empleados)
+    const currentResp = selResponsible.value;
+    selResponsible.innerHTML = '<option value="">-- Quién Ajusta --</option>';
+    state.employees.forEach(e => {
+      // Opcional: Mostrar el rol en el texto
+      let roleTxt = '';
+      if(e.role === 'WAREHOUSE') roleTxt = ' (Bodega)';
+      else if(e.role === 'ADMIN') roleTxt = ' (Admin)';
+      
+      // Solo mostramos empleados activos
+      if (e.isActive) {
+        const opt = document.createElement('option');
+        opt.value = e.ID;
+        opt.textContent = `${e.firstName} ${e.lastName}${roleTxt}`;
+        selResponsible.appendChild(opt);
+      }
+    });
+    selResponsible.value = currentResp;
   }
 
-  // 3. Gestión del Formulario
+  // 4. Gestión del Formulario
   function toggleForm(show) {
     state.isFormVisible = show;
     if (show) {
@@ -237,8 +276,9 @@ export function render(host) {
     const hasProd = !!form.elements.product_ID.value;
     const hasQty = !!form.elements.quantity.value;
     const hasRef = !!form.elements.reference.value.trim();
+    const hasResp = !!form.elements.responsible_ID.value; // <--- Nueva validación
 
-    if (hasProd && hasQty && hasRef) {
+    if (hasProd && hasQty && hasRef && hasResp) {
       btnSave.removeAttribute('disabled');
     } else {
       btnSave.setAttribute('disabled', 'true');
@@ -267,7 +307,7 @@ export function render(host) {
   form.addEventListener('input', checkValidity);
   form.addEventListener('change', checkValidity);
 
-  // 4. Submit: Transacción manual
+  // 5. Submit: Transacción manual con Responsable
   form.addEventListener('submit', async (ev) => {
     ev.preventDefault();
     const formData = new FormData(form);
@@ -276,6 +316,7 @@ export function render(host) {
     const type = formData.get('type'); // IN o OUT
     const qty = parseInt(formData.get('quantity'));
     const ref = formData.get('reference');
+    const respId = formData.get('responsible_ID'); // <--- Capturamos ID
 
     // Validar stock suficiente para salidas
     const product = state.products.find(p => p.ID === prodId);
@@ -285,12 +326,13 @@ export function render(host) {
     }
 
     try {
-      // A) Crear Movimiento (Historial)
+      // A) Crear Movimiento (Historial) INCLUYENDO AL RESPONSABLE
       await apiCreateMovement({
         product_ID: prodId,
         type: type,
         quantity: qty,
         reference: ref,
+        responsible_ID: respId, // <--- NEXO RRHH
         date: new Date().toISOString()
       });
 
@@ -303,7 +345,7 @@ export function render(host) {
 
       showToast('Movimiento registrado exitosamente');
       toggleForm(false);
-      loadData(); // Recargar tabla para ver el nuevo stock
+      loadData(); // Recargar tabla
 
     } catch (err) {
       console.error(err);

@@ -36,74 +36,59 @@
 
         <details class="nav-group" open>
           <summary>Maestros</summary>
-          <button
-            class="nav-item"
-            data-module="customers"
-            type="button"
-          >
+          <button class="nav-item" data-module="customers" type="button">
             <span class="nav-item-title">Clientes</span>
             <span class="nav-item-sub">Maestro de clientes</span>
           </button>
-
-          <button
-            class="nav-item"
-            data-module="products"
-            type="button"
-          >
+          <button class="nav-item" data-module="products" type="button">
             <span class="nav-item-title">Productos</span>
             <span class="nav-item-sub">Catálogo de productos</span>
           </button>
         </details>
 
         <details class="nav-group" open>
+          <summary>Recursos Humanos</summary>
+          <button class="nav-item" data-module="employees" type="button">
+            <span class="nav-item-title">Colaboradores</span>
+            <span class="nav-item-sub">Directorio y Roles</span>
+          </button>
+          <button class="nav-item" data-module="contracts" type="button">
+            <span class="nav-item-title">Contratos y Datos</span>
+            <span class="nav-item-sub">AFP, Salud, Banco</span>
+          </button>
+          <button class="nav-item" data-module="payroll" type="button">
+            <span class="nav-item-title">Remuneraciones</span>
+            <span class="nav-item-sub">Liquidaciones y HHEE</span>
+          </button>
+        </details>
+
+        <details class="nav-group">
           <summary>Compras</summary>
-          <button
-            class="nav-item"
-            data-module="suppliers"
-            type="button"
-          >
+          <button class="nav-item" data-module="suppliers" type="button">
             <span class="nav-item-title">Proveedores</span>
             <span class="nav-item-sub">Base de proveedores</span>
           </button>
-
-          <button
-            class="nav-item"
-            data-module="purchasing"
-            type="button"
-          >
+          <button class="nav-item" data-module="purchasing" type="button">
             <span class="nav-item-title">Pedidos de Compra</span>
             <span class="nav-item-sub">Órdenes y Recepción</span>
           </button>
         </details>
 
-        <details class="nav-group" open>
+        <details class="nav-group">
           <summary>Logística</summary>
-          <button
-            class="nav-item"
-            data-module="inventory"
-            type="button"
-          >
+          <button class="nav-item" data-module="inventory" type="button">
             <span class="nav-item-title">Inventario</span>
             <span class="nav-item-sub">Stock y Movimientos</span>
           </button>
         </details>
 
-        <details class="nav-group" open>
+        <details class="nav-group">
           <summary>Ventas</summary>
-          <button
-            class="nav-item"
-            data-module="salesorders"
-            type="button"
-          >
+          <button class="nav-item" data-module="salesorders" type="button">
             <span class="nav-item-title">Pedidos de venta</span>
             <span class="nav-item-sub">Cabecera de pedidos</span>
           </button>
-
-          <button
-            class="nav-item"
-            data-module="salesitems"
-            type="button"
-          >
+          <button class="nav-item" data-module="salesitems" type="button">
             <span class="nav-item-title">Ítems de pedido</span>
             <span class="nav-item-sub">Detalle de líneas</span>
           </button>
@@ -111,11 +96,7 @@
 
         <details class="nav-group">
           <summary>Técnico</summary>
-          <button
-            class="nav-item"
-            data-module="catalog"
-            type="button"
-          >
+          <button class="nav-item" data-module="catalog" type="button">
             <span class="nav-item-title">Vista técnica CAP</span>
             <span class="nav-item-sub">Servicios y Fiori preview</span>
           </button>
@@ -125,139 +106,95 @@
       <main class="shell-content">
         <div class="content-header">
           <h1 id="content-title">ERP CAP On-Prem – Módulos</h1>
-          <button
-            id="back-button"
-            type="button"
-            class="back-button hidden"
-          >
+          <button id="back-button" type="button" class="back-button hidden">
             Volver al inicio
           </button>
         </div>
 
         <section id="welcome-panel" class="welcome-panel">
           <p class="welcome-lead">
-            Selecciona un módulo funcional en el menú izquierdo para gestionar datos reales
-            mediante OData y Fiori preview.
+            Sistema ERP Modular: Gestión comercial, logística y <strong>Recursos Humanos</strong>.
           </p>
 
           <div class="welcome-grid">
             
-            <article
-              class="welcome-card"
-              data-module="customers"
-              role="button"
-              tabindex="0"
-            >
+            <article class="welcome-card" data-module="employees" role="button" tabindex="0" style="border-top: 4px solid #9c27b0;">
+              <h2 style="color:#9c27b0;">Colaboradores</h2>
+              <h3>Gestión de Personal</h3>
+              <p>
+                Ficha del empleado: Vendedores, Bodegueros y Administrativos. 
+                Control de RUT, contacto y asignación de roles.
+              </p>
+            </article>
+
+            <article class="welcome-card" data-module="payroll" role="button" tabindex="0" style="border-top: 4px solid #9c27b0;">
+              <h2 style="color:#9c27b0;">Remuneraciones</h2>
+              <h3>Nómina y Pagos</h3>
+              <p>
+                Procesamiento mensual de sueldos, cálculo de horas extra (HHEE),
+                bonos por ventas y descuentos legales.
+              </p>
+            </article>
+
+            <article class="welcome-card" data-module="customers" role="button" tabindex="0">
               <h2>Clientes</h2>
               <h3>Maestro de clientes</h3>
-              <p>
-                Alta, modificación y baja de clientes. Datos de contacto, dirección,
-                país y estado activo.
-              </p>
+              <p>Base de datos de clientes, direcciones y estado comercial.</p>
             </article>
 
-            <article
-              class="welcome-card"
-              data-module="products"
-              role="button"
-              tabindex="0"
-            >
+            <article class="welcome-card" data-module="products" role="button" tabindex="0">
               <h2>Productos</h2>
-              <h3>Catálogo de productos</h3>
-              <p>
-                Gestión de productos, precios, moneda y SKU. Insumo directo para
-                ventas y compras.
-              </p>
+              <h3>Catálogo</h3>
+              <p>Gestión de SKUs, precios y atributos de productos.</p>
             </article>
 
-            <article
-              class="welcome-card"
-              data-module="suppliers"
-              role="button"
-              tabindex="0"
-            >
-              <h2>Proveedores</h2>
-              <h3>Gestión de compras</h3>
-              <p>
-                Registro de socios comerciales para el abastecimiento. Datos fiscales
-                y condiciones de pago.
-              </p>
-            </article>
-
-            <article
-              class="welcome-card"
-              data-module="purchasing"
-              role="button"
-              tabindex="0"
-            >
-              <h2>Pedidos de Compra</h2>
-              <h3>Aprovisionamiento</h3>
-              <p>
-                Creación de órdenes de compra a proveedores y <strong>recepción de mercadería</strong>
-                para aumentar el stock automáticamente.
-              </p>
-            </article>
-
-            <article
-              class="welcome-card"
-              data-module="inventory"
-              role="button"
-              tabindex="0"
-            >
+            <article class="welcome-card" data-module="inventory" role="button" tabindex="0">
               <h2>Inventario</h2>
-              <h3>Control de Stock</h3>
-              <p>
-                Visualización de existencias en tiempo real. Historial de movimientos (Kardex)
-                generado por compras y ventas.
-              </p>
+              <h3>Logística</h3>
+              <p>Control de existencias, Kardex y movimientos de bodega.</p>
             </article>
 
-            <article
-              class="welcome-card"
-              data-module="salesorders"
-              role="button"
-              tabindex="0"
-            >
-              <h2>Pedidos de venta</h2>
-              <h3>Salida de mercadería</h3>
-              <p>
-                Registro de ventas a clientes. Al confirmar un pedido, 
-                el sistema descuenta el stock disponible.
-              </p>
+            <article class="welcome-card" data-module="purchasing" role="button" tabindex="0">
+              <h2>Compras</h2>
+              <h3>Aprovisionamiento</h3>
+              <p>Gestión de proveedores y recepción de mercadería.</p>
             </article>
 
-            <article
-              class="welcome-card technical-card"
-              data-module="catalog"
-              role="button"
-              tabindex="0"
-            >
-              <h2>Vista técnica CAP</h2>
-              <h3>Servicios OData</h3>
-              <p>
-                Acceso a metadatos, entidades y enlaces
-                <strong>Fiori preview</strong> generados automáticamente por CAP.
-              </p>
+            <article class="welcome-card" data-module="salesorders" role="button" tabindex="0">
+              <h2>Ventas</h2>
+              <h3>Comercial</h3>
+              <p>Generación de pedidos de venta y facturación.</p>
             </article>
+
           </div>
         </section>
 
-        <section
-          id="module-panel"
-          class="welcome-panel hidden"
-          aria-live="polite"
-        ></section>
+        <section id="module-panel" class="welcome-panel hidden" aria-live="polite"></section>
       </main>
     </div>
 
     <footer class="shell-footer">
       <span>ERP CAP On-Prem &mdash; Demo educativa</span>
-      <span>CAP Node.js &bull; PostgreSQL on Docker &bull; Fiori preview</span>
+      <span>Sprint 6: Recursos Humanos</span>
     </footer>
   </div>
 
   <script type="module">
     const moduleRegistry = {
+      // --- RRHH (NUEVO SPRINT 6) ---
+      employees: {
+        title: 'Ficha de Colaboradores',
+        loader: () => import('./modules/employees.js')
+      },
+      contracts: {
+        title: 'Contratos y Datos Legales',
+        loader: () => import('./modules/contracts.js')
+      },
+      payroll: {
+        title: 'Remuneraciones y Nómina',
+        loader: () => import('./modules/payroll.js')
+      },
+
       // --- MAESTROS ---
       customers: {
         title: 'Clientes',
@@ -268,7 +205,7 @@
         loader: () => import('./modules/products.js')
       },
       
-      // --- COMPRAS (NUEVO) ---
+      // --- COMPRAS ---
       suppliers: {
         title: 'Proveedores',
         loader: () => import('./modules/suppliers.js')
@@ -318,7 +255,6 @@
       modulePanel.classList.add('hidden');
       modulePanel.innerHTML = '';
       backBtn.classList.add('hidden');
-
       const home = document.querySelector('[data-module="home"]');
       setActiveNav(home);
     }
@@ -343,7 +279,7 @@
         modulePanel.innerHTML = `
           <div class="module-placeholder">
             <h2>${entry.title}</h2>
-            <p>Este módulo está en construcción o no se ha definido el loader.</p>
+            <p>Este módulo está en construcción (Sprint 6 en progreso).</p>
           </div>
         `;
         return;
@@ -363,43 +299,33 @@
             <h2>Error al cargar el módulo</h2>
             <p>${entry.title}</p>
             <pre>${err.message}</pre>
-            <p>Verifica que los archivos .js existan (suppliers.js, purchasing.js).</p>
+            <p>Verifica que hayas creado los archivos JS correspondientes.</p>
           </div>
         `;
       }
     }
 
-    // Eventos del menú lateral
     navItems.forEach((btn) => {
       btn.addEventListener('click', () => {
         const module = btn.dataset.module;
-        if (module === 'home') {
-          showHome();
-        } else {
-          openModule(module, btn);
-        }
+        if (module === 'home') { showHome(); } 
+        else { openModule(module, btn); }
       });
     });
 
-    // Tarjetas clicables en la pantalla de inicio
-    document
-      .querySelectorAll('.welcome-card[data-module]')
-      .forEach((card) => {
-        card.addEventListener('click', () => {
-          const module = card.dataset.module;
-          const btn = document.querySelector(
-            `.nav-item[data-module="${module}"]`
-          );
-          openModule(module, btn || null);
-        });
-
-        card.addEventListener('keydown', (ev) => {
-          if (ev.key === 'Enter' || ev.key === ' ') {
-            ev.preventDefault();
-            card.click();
-          }
-        });
+    document.querySelectorAll('.welcome-card[data-module]').forEach((card) => {
+      card.addEventListener('click', () => {
+        const module = card.dataset.module;
+        const btn = document.querySelector(`.nav-item[data-module="${module}"]`);
+        openModule(module, btn || null);
       });
+      card.addEventListener('keydown', (ev) => {
+        if (ev.key === 'Enter' || ev.key === ' ') {
+          ev.preventDefault();
+          card.click();
+        }
+      });
+    });
 
     backBtn.addEventListener('click', showHome);
   </script>
