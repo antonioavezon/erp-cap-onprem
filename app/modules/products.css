@@ -1,0 +1,267 @@
+/* app/modules/products.css */
+
+/* --- Animación de entrada --- */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.prod-module {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  gap: 1rem;
+  animation: fadeIn 0.4s ease-out;
+  font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* --- Header Superior --- */
+.prod-header {
+  display: flex;
+  justify-content: flex-end; /* Botones a la derecha */
+  padding-bottom: 10px;
+  border-bottom: 1px solid #dde2e6;
+}
+
+.prod-actions {
+  display: flex;
+  gap: 10px;
+}
+
+/* --- Cuerpo (Tabla izquierda / Formulario derecha) --- */
+.prod-body {
+  display: flex;
+  gap: 20px;
+  flex: 1;
+  overflow: hidden; /* Evita scroll en la página entera */
+}
+
+/* ================= TABLA (Listado) ================= */
+.prod-list {
+  flex: 3; /* Ocupa 70% del ancho */
+  background: white;
+  border: 1px solid #c5cdd6;
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.table-container {
+  overflow-y: auto;
+  flex: 1;
+}
+
+.prod-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.prod-table thead th {
+  background-color: #eff4f9; /* Gris azulado muy claro */
+  color: #445566;
+  font-weight: 700;
+  text-align: left;
+  padding: 12px 15px;
+  position: sticky;
+  top: 0;
+  border-bottom: 2px solid #dde2e6;
+  z-index: 2;
+  cursor: pointer;
+  user-select: none;
+}
+
+.prod-table thead th:hover {
+  background-color: #e0e8f0;
+}
+
+.prod-table tbody td {
+  padding: 10px 15px;
+  border-bottom: 1px solid #eee;
+  color: #333;
+  vertical-align: middle;
+}
+
+.prod-table tbody tr:hover {
+  background-color: #f8faff; /* Highlight al pasar el mouse */
+}
+
+.sort-icon {
+  font-size: 0.8em;
+  margin-left: 4px;
+  color: #888;
+}
+
+/* ================= FORMULARIO (Panel Lateral) ================= */
+.prod-form-wrapper {
+  flex: 1.5; /* Ocupa 30% del ancho (más estrecho que la tabla) */
+  min-width: 350px;
+  background-color: #fcfcfc;
+  border-left: 1px solid #dde2e6;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: -5px 0 15px rgba(0,0,0,0.03);
+  overflow-y: auto;
+}
+
+/* Clase para ocultar el panel */
+.hidden {
+  display: none !important;
+}
+
+.prod-form-header h3 {
+  margin: 0 0 20px 0;
+  color: #0056b3; /* Azul SAP */
+  font-size: 1.2rem;
+  border-bottom: 2px solid #0056b3;
+  padding-bottom: 8px;
+  display: inline-block;
+}
+
+.prod-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+/* --- Grid del Formulario (2 Columnas) --- */
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* Dos columnas iguales */
+  gap: 15px;
+}
+
+/* Para campos que ocupan todo el ancho (como descripción) */
+.full-width {
+  grid-column: span 2;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form-group label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #555;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  padding: 8px 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 0.95rem;
+  background: #fff;
+  transition: all 0.2s;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+  border-color: #0056b3;
+  box-shadow: 0 0 0 3px rgba(0, 86, 179, 0.1);
+  outline: none;
+}
+
+.form-check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #eef6ff;
+  padding: 10px;
+  border-radius: 4px;
+  border: 1px solid #dbeeff;
+}
+
+.form-check label {
+  font-size: 0.9rem;
+  color: #0056b3;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* --- Botones --- */
+.form-actions {
+  margin-top: 20px;
+  display: flex;
+  gap: 10px;
+  padding-top: 15px;
+  border-top: 1px solid #eee;
+}
+
+.btn {
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: background 0.2s;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn.primary {
+  background-color: #0056b3;
+  color: white;
+}
+.btn.primary:hover { background-color: #004494; }
+.btn.primary:disabled { background-color: #a0c4e4; cursor: not-allowed; }
+
+.btn.ghost {
+  background-color: transparent;
+  color: #0056b3;
+  border: 1px solid #0056b3;
+}
+.btn.ghost:hover { background-color: #f0f8ff; }
+
+.btn.secondary {
+  background-color: #e9ecef;
+  color: #495057;
+}
+.btn.secondary:hover { background-color: #dde2e6; }
+
+.btn.tiny {
+  padding: 4px 8px;
+  font-size: 0.8rem;
+  margin-right: 4px;
+  background: #eee;
+  color: #333;
+}
+.btn.tiny.danger {
+  background: #fff0f0;
+  color: #d00;
+  border: 1px solid #ffd0d0;
+}
+
+.btn-full {
+  flex: 1;
+}
+
+/* Mensajes Flotantes (Toasts) */
+.toast-success {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: #2e7d32;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  z-index: 9999;
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}

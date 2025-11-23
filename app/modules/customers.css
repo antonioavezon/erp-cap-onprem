@@ -1,0 +1,212 @@
+/* app/modules/customers.css */
+
+/* Contenedor principal del módulo */
+.cust-module {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  height: 100%;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- Header y Acciones --- */
+.cust-header {
+  display: flex;
+  justify-content: flex-end; /* Botones a la derecha */
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.cust-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* --- Layout Principal (Tabla + Formulario) --- */
+.cust-body {
+  display: flex;
+  gap: 2rem;
+  flex: 1;
+  overflow: hidden; /* Para scroll interno */
+}
+
+/* --- Tabla de Datos --- */
+.cust-list {
+  flex: 2; /* Ocupa más espacio si el form está oculto */
+  transition: flex 0.3s ease;
+  overflow-y: auto;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: #fff;
+}
+
+.cust-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.cust-table thead {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.cust-table th {
+  background-color: #dbeeff; /* Celeste claro */
+  color: #000;               /* Negro */
+  font-weight: 700;          /* Negrita */
+  padding: 10px;
+  text-align: left;
+  border-bottom: 2px solid #bbb;
+  border-right: 1px solid #dbeeff;
+  cursor: pointer; /* Indicar que es ordenable */
+  user-select: none;
+  transition: background 0.2s;
+}
+
+.cust-table th:hover {
+  background-color: #cce4ff;
+}
+
+.cust-table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid #eee;
+  border-right: 1px solid #eee;
+  color: #333;
+}
+
+.cust-table tr:hover {
+  background-color: #f5f9ff;
+}
+
+.sort-icon {
+  margin-left: 5px;
+  font-size: 0.8em;
+  color: #555;
+}
+
+/* --- Formulario (Panel Lateral) --- */
+.cust-form-wrapper {
+  flex: 1;
+  background: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  box-shadow: -2px 0 10px rgba(0,0,0,0.05);
+  overflow-y: auto;
+  min-width: 320px;
+}
+
+/* Clase para ocultar el formulario */
+.hidden {
+  display: none !important;
+}
+
+.cust-form-header h3 {
+  margin-top: 0;
+  color: #0056b3;
+  border-bottom: 2px solid #0056b3;
+  padding-bottom: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.cust-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem; /* Espacio vertical entre campos */
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.form-group label {
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: #444;
+}
+
+.form-group input, 
+.form-group select {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  transition: border-color 0.2s;
+}
+
+.form-group input:focus {
+  border-color: #0056b3;
+  outline: none;
+}
+
+.form-check {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+/* --- Botones del formulario --- */
+.form-footer {
+  margin-top: 2rem;
+  display: flex;
+  gap: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e0e0e0;
+}
+
+.btn-full {
+  flex: 1;
+  padding: 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+  border: none;
+}
+
+.btn-primary {
+  background-color: #0056b3;
+  color: white;
+}
+.btn-primary:disabled {
+  background-color: #a0c4e4;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  background-color: #e0e0e0;
+  color: #333;
+}
+.btn-secondary:hover {
+  background-color: #d5d5d5;
+}
+
+/* Mensaje de éxito (Toast simple) */
+.toast-success {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: #28a745;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 4px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  animation: slideUp 0.3s ease;
+  z-index: 1000;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}

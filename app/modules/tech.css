@@ -1,0 +1,116 @@
+/* app/modules/tech.css */
+
+.tech-module {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 20px;
+  animation: fadeIn 0.4s ease-out;
+  font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.tech-header {
+  border-bottom: 1px solid #dde2e6;
+  padding-bottom: 15px;
+  margin-bottom: 10px;
+}
+
+.tech-header h2 {
+  color: #0056b3;
+  margin: 0;
+  font-size: 1.8rem;
+}
+
+.tech-header p {
+  color: #666;
+  margin: 5px 0 0 0;
+}
+
+/* Grid de tarjetas */
+.tech-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.tech-card {
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  transition: transform 0.2s, box-shadow 0.2s;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.tech-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  border-color: #0056b3;
+}
+
+.card-icon {
+  font-size: 2rem;
+  margin-bottom: 10px;
+}
+
+.tech-card h3 {
+  margin: 0 0 10px 0;
+  color: #333;
+  font-size: 1.1rem;
+}
+
+.tech-card p {
+  font-size: 0.9rem;
+  color: #666;
+  line-height: 1.4;
+  margin-bottom: 20px;
+  flex-grow: 1;
+}
+
+.tech-links {
+  display: flex;
+  gap: 10px;
+}
+
+.btn-link {
+  text-decoration: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  background-color: #f0f8ff;
+  color: #0056b3;
+  border: 1px solid #cce4ff;
+  text-align: center;
+  flex: 1;
+  transition: all 0.2s;
+}
+
+.btn-link:hover {
+  background-color: #0056b3;
+  color: white;
+  border-color: #0056b3;
+}
+
+.code-block {
+  background: #2d2d2d;
+  color: #ccc;
+  padding: 15px;
+  border-radius: 6px;
+  font-family: monospace;
+  font-size: 0.85rem;
+  margin-top: 20px;
+}
+
+.code-block .cmd { color: #a5d6ff; }
+.code-block .comment { color: #6a9955; }
