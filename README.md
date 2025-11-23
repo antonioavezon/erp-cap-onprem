@@ -104,13 +104,6 @@ Este proyecto se encuentra bajo licencia MIT.
 Ver archivo LICENSE
  para más detalles.
 
-Licencia
-
-Este proyecto se encuentra bajo licencia MIT.
-Ver archivo LICENSE
- para más detalles.
-
-
 ### Cómo lo sumas al repo
 
 **Opción GitHub Web** (la más rápida ahora):
