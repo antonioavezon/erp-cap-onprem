@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>ERP CAP On-Prem – Módulos</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="shell">
+    <!-- Barra superior -->
+    <header class="shell-header">
+      <div class="shell-header-left">
+        <span class="app-title">ERP CAP On-Prem</span>
+        <span class="app-subtitle">Demo educativa CAP + PostgreSQL</span>
+      </div>
+      <div class="shell-header-right">
+        <span class="shell-user">Usuario demo</span>
+      </div>
+    </header>
+
+    <!-- Cuerpo principal -->
+    <div class="shell-main">
+      <!-- Menú lateral -->
+      <nav class="shell-sidebar">
+        <div class="sidebar-logo">
+          <span class="logo-circle">E</span>
+          <span class="logo-text">ERP CAP</span>
+        </div>
+
+        <button
+          class="nav-item nav-item-home is-active"
+          data-module="home"
+          type="button"
+        >
+          <span class="nav-item-title">Inicio</span>
+          <span class="nav-item-sub">Resumen general</span>
+        </button>
+
+        <details class="nav-group" open>
+          <summary>Maestros</summary>
+          <button
+            class="nav-item"
+            data-module="customers"
+            type="button"
+          >
+            <span class="nav-item-title">Clientes</span>
+            <span class="nav-item-sub">Maestro de clientes</span>
+          </button>
+
+          <button
+            class="nav-item"
+            data-module="products"
+            type="button"
+          >
+            <span class="nav-item-title">Productos</span>
+            <span class="nav-item-sub">Catálogo de productos</span>
+          </button>
+        </details>
+
+        <details class="nav-group" open>
+          <summary>Ventas</summary>
+          <button
+            class="nav-item"
+            data-module="salesorders"
+            type="button"
+          >
+            <span class="nav-item-title">Pedidos de venta</span>
+            <span class="nav-item-sub">Cabecera de pedidos</span>
+          </button>
+
+          <button
+            class="nav-item"
+            data-module="salesitems"
+            type="button"
+          >
+            <span class="nav-item-title">Ítems de pedido</span>
+            <span class="nav-item-sub">Detalle de líneas</span>
+          </button>
+        </details>
+
+        <details class="nav-group">
+          <summary>Técnico</summary>
+          <button
+            class="nav-item"
+            data-module="catalog"
+            type="button"
+          >
+            <span class="nav-item-title">Vista técnica CAP</span>
+            <span class="nav-item-sub">Servicios y Fiori preview</span>
+          </button>
+        </details>
+      </nav>
+
+      <!-- Contenido central -->
+      <main class="shell-content">
+        <div class="content-header">
+          <h1 id="content-title">ERP CAP On-Prem – Módulos</h1>
+          <button
+            id="back-button"
+            type="button"
+            class="back-button hidden"
+          >
+            Volver al inicio
+          </button>
+        </div>
+
+        <!-- Panel de bienvenida -->
+        <section id="welcome-panel" class="welcome-panel">
+          <p class="welcome-lead">
+            Selecciona un módulo funcional en el menú izquierdo para gestionar datos reales
+            mediante OData y Fiori preview.
+          </p>
+
+          <div class="welcome-grid">
+            <article
+              class="welcome-card"
+              data-module="customers"
+              role="button"
+              tabindex="0"
+            >
+              <h2>Clientes</h2>
+              <h3>Maestro de clientes</h3>
+              <p>
+                Alta, modificación y baja de clientes. Datos de contacto, dirección,
+                país y estado activo. Base para análisis de cartera y riesgo.
+              </p>
+            </article>
+
+            <article
+              class="welcome-card"
+              data-module="products"
+              role="button"
+              tabindex="0"
+            >
+              <h2>Productos</h2>
+              <h3>Catálogo de productos</h3>
+              <p>
+                Gestión de productos, precios, moneda y SKU. Insumo directo para
+                pedidos de venta, márgenes y rentabilidad.
+              </p>
+            </article>
+
+            <article
+              class="welcome-card"
+              data-module="salesorders"
+              role="button"
+              tabindex="0"
+            >
+              <h2>Pedidos de venta</h2>
+              <h3>Cabecera e ítems</h3>
+              <p>
+                Registro de pedidos por cliente, fecha, estado, montos totales y
+                detalle de líneas. Mantiene la relación con clientes y productos.
+              </p>
+            </article>
+
+            <article
+              class="welcome-card technical-card"
+              data-module="catalog"
+              role="button"
+              tabindex="0"
+            >
+              <h2>Vista técnica CAP</h2>
+              <h3>Servicios OData</h3>
+              <p>
+                Acceso a metadatos, entidades y enlaces
+                <strong>Fiori preview</strong> generados automáticamente por CAP
+                sobre PostgreSQL.
+              </p>
+            </article>
+          </div>
+        </section>
+
+        <!-- Panel donde se cargarán los módulos (misma página) -->
+        <section
+          id="module-panel"
+          class="welcome-panel hidden"
+          aria-live="polite"
+        ></section>
+      </main>
+    </div>
+
+    <!-- Pie de página -->
+    <footer class="shell-footer">
+      <span>ERP CAP On-Prem &mdash; Demo educativa</span>
+      <span>CAP Node.js &bull; PostgreSQL on Docker &bull; Fiori preview</span>
+    </footer>
+  </div>
+
+  <script type="module">
+    const moduleRegistry = {
+      customers: {
+        title: 'Clientes',
+        loader: () => import('./modules/customers.js')
+      },
+      products: {
+        title: 'Productos',
+        loader: () => import('./modules/products.js')
+      },
+      salesorders: {
+        title: 'Pedidos de venta',
+        loader: () => import('./modules/salesorders.js')
+      },
+      salesitems: {
+        title: 'Ítems de pedido',
+        loader: () => import('./modules/salesitems.js')
+      },
+      catalog: {
+        title: 'Vista técnica CAP',
+        loader: () => import('./modules/tech.js') // <--- AQUÍ ESTÁ EL CAMBIO
+      }
+    };
+
+    const navItems     = document.querySelectorAll('.nav-item');
+    const titleEl      = document.getElementById('content-title');
+    const welcomePanel = document.getElementById('welcome-panel');
+    const modulePanel  = document.getElementById('module-panel');
+    const backBtn      = document.getElementById('back-button');
+
+    function setActiveNav(target) {
+      navItems.forEach((btn) => btn.classList.remove('is-active'));
+      if (target) target.classList.add('is-active');
+    }
+
+    function showHome() {
+      titleEl.textContent = 'ERP CAP On-Prem – Módulos';
+      welcomePanel.classList.remove('hidden');
+      modulePanel.classList.add('hidden');
+      modulePanel.innerHTML = '';
+      backBtn.classList.add('hidden');
+
+      const home = document.querySelector('[data-module="home"]');
+      setActiveNav(home);
+    }
+
+    async function openModule(moduleKey, triggerButton) {
+      const entry = moduleRegistry[moduleKey];
+      if (!entry) return;
+
+      titleEl.textContent = `Módulo: ${entry.title}`;
+      welcomePanel.classList.add('hidden');
+      modulePanel.classList.remove('hidden');
+      backBtn.classList.remove('hidden');
+      setActiveNav(triggerButton);
+
+      modulePanel.innerHTML = `
+        <div class="module-loading">
+          Cargando módulo <strong>${entry.title}</strong>...
+        </div>
+      `;
+
+      if (!entry.loader) {
+        // Caso especial: catalog sin módulo propio todavía
+        modulePanel.innerHTML = `
+          <div class="module-placeholder">
+            <h2>${entry.title}</h2>
+            <p>
+              Aquí podrías abrir directamente /catalog o el Fiori preview técnico.
+            </p>
+          </div>
+        `;
+        return;
+      }
+
+      try {
+        const mod = await entry.loader();
+        if (!mod || typeof mod.render !== 'function') {
+          throw new Error('El módulo no exporta una función render(host)');
+        }
+        modulePanel.innerHTML = '';
+        mod.render(modulePanel);
+      } catch (err) {
+        console.error(err);
+        modulePanel.innerHTML = `
+          <div class="module-error">
+            <h2>Error al cargar el módulo</h2>
+            <p>${entry.title}</p>
+            <pre>${err.message}</pre>
+          </div>
+        `;
+      }
+    }
+
+    // Eventos del menú lateral
+    navItems.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const module = btn.dataset.module;
+        if (module === 'home') {
+          showHome();
+        } else {
+          openModule(module, btn);
+        }
+      });
+    });
+
+    // Tarjetas clicables en la pantalla de inicio
+    document
+      .querySelectorAll('.welcome-card[data-module]')
+      .forEach((card) => {
+        card.addEventListener('click', () => {
+          const module = card.dataset.module;
+          const btn = document.querySelector(
+            `.nav-item[data-module="${module}"]`
+          );
+          openModule(module, btn || null);
+        });
+
+        card.addEventListener('keydown', (ev) => {
+          if (ev.key === 'Enter' || ev.key === ' ') {
+            ev.preventDefault();
+            card.click();
+          }
+        });
+      });
+
+    backBtn.addEventListener('click', showHome);
+  </script>
+</body>
+</html>
