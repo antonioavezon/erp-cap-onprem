@@ -67,7 +67,7 @@ docker-compose up
 Acceso:
 
 App CAP / servicios: http://localhost:4004
-bash'''
+bash
 
 Estructura del proyecto
 db/         # Modelos CDS (Customer, Product, SalesOrder, SalesOrderItem)
