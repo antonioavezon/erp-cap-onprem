@@ -1,7 +1,7 @@
 {
   "name": "erp-cap-onprem",
   "version": "1.0.0",
-  "description": "A simple CAP project.",
+  "description": "ERP CAP on-prem educational backend",
   "dependencies": {
     "@cap-js/postgres": "^2.0.6",
     "@sap/cds": "^9",
@@ -11,13 +11,15 @@
     "@cap-js/sqlite": "^2"
   },
   "scripts": {
-    "start": "cds-serve"
+    "start": "cds-serve",
+    "deploy": "cds-deploy"
   },
   "private": true,
   "cds": {
     "requires": {
       "db": {
-        "kind": "postgres"
+        "kind": "postgres",
+        "impl": "@cap-js/postgres"
       }
     }
   }
