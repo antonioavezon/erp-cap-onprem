@@ -67,6 +67,7 @@ docker-compose up
 Acceso:
 
 App CAP / servicios: http://localhost:4004
+bash'''
 
 Estructura del proyecto
 db/         # Modelos CDS (Customer, Product, SalesOrder, SalesOrderItem)
@@ -86,6 +87,12 @@ Roadmap funcional (MVP)
  Sprint 3: Servicios de dominio y reglas de negocio básicas
 
  Sprint 4: Vistas Fiori y refinamiento
+
+Licencia
+
+Este proyecto se encuentra bajo licencia MIT.
+Ver archivo LICENSE
+ para más detalles.
 
 Licencia
 
