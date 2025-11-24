@@ -1,6 +1,8 @@
 // app/modules/salesitems.js
 // Módulo Ítems de pedido – Versión Profesional
 
+import { apiFetch } from './utils.js'; // <--- FETCH SEGURO
+
 export const title = 'Ítems de pedido';
 
 const API_ITEMS    = '/catalog/SalesOrderItems';
@@ -143,11 +145,11 @@ export function render(host) {
   // 1. Cargar Datos (Maestros + Ítems)
   async function loadData() {
     try {
-      // Cargar todo en paralelo para rapidez
+      // USAR APIFETCH SEGURO
       const [resItems, resOrders, resProds] = await Promise.all([
-        fetch(`${API_ITEMS}?$orderby=createdAt desc`),
-        fetch(`${API_ORDERS}?$orderby=orderNo asc`),
-        fetch(`${API_PRODUCTS}?$orderby=name asc`)
+        apiFetch(`${API_ITEMS}?$orderby=createdAt desc`),
+        apiFetch(`${API_ORDERS}?$orderby=orderNo asc`),
+        apiFetch(`${API_PRODUCTS}?$orderby=name asc`)
       ]);
 
       const dItems = await resItems.json();
@@ -427,20 +429,21 @@ function showToast(msg) {
   setTimeout(() => div.remove(), 3000);
 }
 
-// API
+// --- API SEGURO (USANDO apiFetch) ---
+
 async function apiCreate(data) {
-  const res = await fetch(API_ITEMS, {
+  const res = await apiFetch(API_ITEMS, {
     method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(data)
   });
   if (!res.ok) throw new Error(await res.text());
 }
 async function apiUpdate(id, data) {
-  const res = await fetch(`${API_ITEMS}/${id}`, {
+  const res = await apiFetch(`${API_ITEMS}/${id}`, {
     method: 'PATCH', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(data)
   });
   if (!res.ok) throw new Error(await res.text());
 }
 async function apiDelete(id) {
-  const res = await fetch(`${API_ITEMS}/${id}`, { method: 'DELETE' });
+  const res = await apiFetch(`${API_ITEMS}/${id}`, { method: 'DELETE' });
   if (!res.ok) throw new Error(await res.text());
 }

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>ERP Acceso</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="login.css">
+</head>
+<body>
+
+  <div class="login-card">
+    <div class="login-logo">🔐</div>
+    <h2>ERP Acceso</h2>
+    
+    <form id="login-form">
+      <div class="form-group">
+        <label for="username">Usuario</label>
+        <input type="text" id="username" name="username" placeholder="admin" required autofocus autocomplete="username">
+      </div>
+      
+      <div class="form-group">
+        <label for="password">Contraseña</label>
+        <input type="password" id="password" name="password" placeholder="••••••" required autocomplete="current-password">
+      </div>
+      
+      <button type="submit" class="btn-login">Ingresar</button>
+      
+      <div id="error-box" class="error-msg"></div>
+    </form>
+  </div>
+
+  <script src="login.js"></script>
+</body>
+</html>

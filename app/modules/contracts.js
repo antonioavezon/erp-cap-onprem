@@ -1,6 +1,8 @@
 // app/modules/contracts.js
 // Módulo Contratos – Datos Legales y Bancarios
 
+import { apiFetch } from './utils.js';
+
 export const title = 'Contratos y Datos Legales';
 
 const API_CONTRACTS = '/catalog/Contracts';
@@ -22,7 +24,7 @@ export function render(host) {
 
   const state = {
     list: [],
-    employees: [], // Para el dropdown
+    employees: [],
     currencies: [],
     sortKey: 'startDate',
     sortDir: 'desc',
@@ -162,11 +164,10 @@ export function render(host) {
 
   async function loadData() {
     try {
-      // Usamos $expand=employee para traer el nombre del colaborador directamente
       const [resContracts, resEmp, resCur] = await Promise.all([
-        fetch(`${API_CONTRACTS}?$expand=employee&$orderby=startDate desc`),
-        fetch(`${API_EMPLOYEES}?$orderby=lastName asc`),
-        fetch(`${API_CURRENCIES}?$orderby=code asc`)
+        apiFetch(`${API_CONTRACTS}?$expand=employee&$orderby=startDate desc`),
+        apiFetch(`${API_EMPLOYEES}?$orderby=lastName asc`),
+        apiFetch(`${API_CURRENCIES}?$orderby=code asc`)
       ]);
 
       const dCont = await resContracts.json();
@@ -181,13 +182,12 @@ export function render(host) {
       updateSelects();
     } catch (err) {
       console.error(err);
-      tbody.innerHTML = `<tr><td colspan="7" style="color:red; text-align:center;">Error al cargar</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="7" style="color:red; text-align:center;">Error al cargar datos</td></tr>`;
     }
   }
 
   function renderTable() {
     const sorted = [...state.list].sort((a, b) => {
-      // Lógica simple de ordenamiento
       let valA = a[state.sortKey];
       let valB = b[state.sortKey];
       if (!valA) valA = ''; if (!valB) valB = '';
@@ -204,11 +204,9 @@ export function render(host) {
     }
 
     sorted.forEach(c => {
-      // Datos expandidos
       const empName = c.employee ? `${c.employee.firstName} ${c.employee.lastName}` : 'Sin Asignar';
       const salaryFmt = c.baseSalary ? `$${Number(c.baseSalary).toLocaleString()} ${c.currency_code}` : '-';
       
-      // Estado (Vigente si no tiene fecha fin o fecha fin es futura)
       const now = new Date();
       const endD = c.endDate ? new Date(c.endDate) : null;
       const isActive = !endD || endD >= now;
@@ -248,7 +246,6 @@ export function render(host) {
   }
 
   function updateSelects() {
-    // Empleados
     selEmployee.innerHTML = '<option value="">-- Seleccionar Colaborador --</option>';
     state.employees.forEach(e => {
       const opt = document.createElement('option');
@@ -257,7 +254,6 @@ export function render(host) {
       selEmployee.appendChild(opt);
     });
 
-    // Monedas
     selCurrency.innerHTML = '<option value="">Moneda</option>';
     state.currencies.forEach(c => {
       const opt = document.createElement('option');
@@ -278,14 +274,12 @@ export function render(host) {
       state.isEditing = false;
       form.reset();
       form.elements.id.value = '';
-      // Defaults
       if (state.currencies.find(c=>c.code==='CLP')) form.elements.currency_code.value = 'CLP';
       form.elements.startDate.value = new Date().toISOString().slice(0,10);
     } else {
       formTitle.textContent = 'Editar Contrato';
       btnSave.textContent = 'Guardar';
       state.isEditing = true;
-      // Fill
       form.elements.id.value = data.ID;
       form.elements.employee_ID.value = data.employee_ID || '';
       form.elements.startDate.value = data.startDate || '';
@@ -312,7 +306,6 @@ export function render(host) {
     }
   }
 
-  // --- Eventos ---
   host.querySelectorAll('th[data-sort]').forEach(th => {
     th.addEventListener('click', () => {
       const key = th.dataset.sort;
@@ -383,7 +376,6 @@ export function render(host) {
   loadData();
 }
 
-// Helpers
 function escapeHtml(text) {
   if (!text) return '';
   return text.toString().replace(/</g, "&lt;");
@@ -399,15 +391,27 @@ function showToast(msg) {
   document.body.appendChild(div);
   setTimeout(() => div.remove(), 3000);
 }
+
+// --- API FETCHERS SEGUROS ---
 async function apiCreate(data) {
-  const res = await fetch(API_CONTRACTS, {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(data)});
+  const res = await apiFetch(API_CONTRACTS, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(data)
+  });
   if (!res.ok) throw new Error(await res.text());
 }
+
 async function apiUpdate(id, data) {
-  const res = await fetch(`${API_CONTRACTS}/${id}`, {method: 'PATCH', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(data)});
+  const res = await apiFetch(`${API_CONTRACTS}/${id}`, {
+    method: 'PATCH',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(data)
+  });
   if (!res.ok) throw new Error(await res.text());
 }
+
 async function apiDelete(id) {
-  const res = await fetch(`${API_CONTRACTS}/${id}`, {method: 'DELETE'});
+  const res = await apiFetch(`${API_CONTRACTS}/${id}`, { method: 'DELETE' });
   if (!res.ok) throw new Error(await res.text());
 }

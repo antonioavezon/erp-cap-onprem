@@ -4,104 +4,137 @@
   <meta charset="UTF-8" />
   <title>ERP CAP On-Prem – Módulos</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <script>
+    (function() {
+      // Si el token no existe, se expulsa inmediatamente.
+      const token = sessionStorage.getItem('erp_token');
+      if (!token) {
+        sessionStorage.clear();
+        window.location.href = '/login.html';
+      }
+    })();
+  </script>
+
   <link rel="stylesheet" href="styles.css" />
+  
+  <style>
+    /* Estilos Header Simples */
+    .shell-header-right { display: flex; align-items: center; font-size: 0.95rem; color: rgba(255, 255, 255, 0.9); }
+    .user-name-display { font-weight: 600; color: white; text-transform: capitalize; }
+    .logout-text-btn { background: none; border: none; color: #ffcccb; cursor: pointer; font-size: 0.95rem; font-family: inherit; text-decoration: underline; padding: 0; margin-left: 5px; }
+    .logout-text-btn:hover { color: white; }
+    /* Estilos Toggle */
+    .shell-sidebar { transition: width 0.2s ease-in-out; }
+    .sidebar-logo { display: flex; align-items: center; justify-content: space-between; padding: 12px 8px 8px; border-bottom: 1px solid #e0e4ea; margin-bottom: 4px; }
+    .toggle-btn { width: 32px; height: 32px; background: none; border: none; font-size: 1.2rem; cursor: pointer; color: #0a6ed1; padding: 0; display: flex; align-items: center; justify-content: center; transition: transform 0.2s; }
+    .shell-sidebar.is-collapsed { width: 60px; }
+    .shell-sidebar.is-collapsed .logo-text,
+    .shell-sidebar.is-collapsed .nav-item-sub,
+    .shell-sidebar.is-collapsed .nav-group summary { display: none; }
+  </style>
 </head>
 <body>
   <div class="shell">
+    
     <header class="shell-header">
       <div class="shell-header-left">
-        <span class="app-title">ERP CAP On-Prem</span>
-        <span class="app-subtitle">Demo educativa CAP + PostgreSQL</span>
+        <span class="app-title">ERP Optimus On-Prem</span>
       </div>
+      
       <div class="shell-header-right">
-        <span class="shell-user">Usuario demo</span>
+        <span class="user-name-display" id="header-username"></span><span>,&nbsp;</span>
+        <button id="header-btn-logout" class="logout-text-btn">Cerrar sesión</button>
       </div>
     </header>
 
     <div class="shell-main">
-      <nav class="shell-sidebar">
+      <nav class="shell-sidebar" id="shell-sidebar">
+        
         <div class="sidebar-logo">
-          <span class="logo-circle">E</span>
-          <span class="logo-text">ERP CAP</span>
+          <span class="logo-text" id="sidebar-app-name">Menú Principal</span>
+          <button id="menu-toggle" class="toggle-btn" title="Contraer">☰</button>
         </div>
 
-        <button
-          class="nav-item nav-item-home is-active"
-          data-module="home"
-          type="button"
-        >
-          <span class="nav-item-title">Inicio</span>
-          <span class="nav-item-sub">Resumen general</span>
-        </button>
+        <div id="nav-items-container">
+          
+          <button class="nav-item nav-item-home is-active" data-module="home" type="button">
+            <span class="nav-item-title">Inicio</span>
+            <span class="nav-item-sub">Resumen general</span>
+          </button>
 
-        <details class="nav-group" open>
-          <summary>Maestros</summary>
-          <button class="nav-item" data-module="customers" type="button">
-            <span class="nav-item-title">Clientes</span>
-            <span class="nav-item-sub">Maestro de clientes</span>
-          </button>
-          <button class="nav-item" data-module="products" type="button">
-            <span class="nav-item-title">Productos</span>
-            <span class="nav-item-sub">Catálogo de productos</span>
-          </button>
-        </details>
+          <details class="nav-group" open>
+            <summary>Maestros</summary>
+            <button class="nav-item" data-module="customers" type="button">
+              <span class="nav-item-title">Clientes</span>
+              <span class="nav-item-sub">Maestro de clientes</span>
+            </button>
+            <button class="nav-item" data-module="products" type="button">
+              <span class="nav-item-title">Productos</span>
+              <span class="nav-item-sub">Catálogo de productos</span>
+            </button>
+          </details>
 
-        <details class="nav-group" open>
-          <summary>Recursos Humanos</summary>
-          <button class="nav-item" data-module="employees" type="button">
-            <span class="nav-item-title">Colaboradores</span>
-            <span class="nav-item-sub">Directorio y Roles</span>
-          </button>
-          <button class="nav-item" data-module="contracts" type="button">
-            <span class="nav-item-title">Contratos y Datos</span>
-            <span class="nav-item-sub">AFP, Salud, Banco</span>
-          </button>
-          <button class="nav-item" data-module="payroll" type="button">
-            <span class="nav-item-title">Remuneraciones</span>
-            <span class="nav-item-sub">Liquidaciones y HHEE</span>
-          </button>
-        </details>
+          <details class="nav-group" open>
+            <summary>Recursos Humanos</summary>
+            <button class="nav-item" data-module="employees" type="button">
+              <span class="nav-item-title">Colaboradores</span>
+              <span class="nav-item-sub">Directorio y Roles</span>
+            </button>
+            <button class="nav-item" data-module="contracts" type="button">
+              <span class="nav-item-title">Contratos</span>
+              <span class="nav-item-sub">Datos Legales</span>
+            </button>
+            <button class="nav-item" data-module="payroll" type="button">
+              <span class="nav-item-title">Remuneraciones</span>
+              <span class="nav-item-sub">Nómina</span>
+            </button>
+          </details>
 
-        <details class="nav-group">
-          <summary>Compras</summary>
-          <button class="nav-item" data-module="suppliers" type="button">
-            <span class="nav-item-title">Proveedores</span>
-            <span class="nav-item-sub">Base de proveedores</span>
-          </button>
-          <button class="nav-item" data-module="purchasing" type="button">
-            <span class="nav-item-title">Pedidos de Compra</span>
-            <span class="nav-item-sub">Órdenes y Recepción</span>
-          </button>
-        </details>
+          <details class="nav-group">
+            <summary>Compras</summary>
+            <button class="nav-item" data-module="suppliers" type="button">
+              <span class="nav-item-title">Proveedores</span>
+              <span class="nav-item-sub">Base de proveedores</span>
+            </button>
+            <button class="nav-item" data-module="purchasing" type="button">
+              <span class="nav-item-title">Pedidos de Compra</span>
+              <span class="nav-item-sub">Órdenes y Recepción</span>
+            </button>
+          </details>
 
-        <details class="nav-group">
-          <summary>Logística</summary>
-          <button class="nav-item" data-module="inventory" type="button">
-            <span class="nav-item-title">Inventario</span>
-            <span class="nav-item-sub">Stock y Movimientos</span>
-          </button>
-        </details>
+          <details class="nav-group">
+            <summary>Logística</summary>
+            <button class="nav-item" data-module="inventory" type="button">
+              <span class="nav-item-title">Inventario</span>
+              <span class="nav-item-sub">Stock y Movimientos</span>
+            </button>
+          </details>
 
-        <details class="nav-group">
-          <summary>Ventas</summary>
-          <button class="nav-item" data-module="salesorders" type="button">
-            <span class="nav-item-title">Pedidos de venta</span>
-            <span class="nav-item-sub">Cabecera de pedidos</span>
-          </button>
-          <button class="nav-item" data-module="salesitems" type="button">
-            <span class="nav-item-title">Ítems de pedido</span>
-            <span class="nav-item-sub">Detalle de líneas</span>
-          </button>
-        </details>
+          <details class="nav-group">
+            <summary>Ventas</summary>
+            <button class="nav-item" data-module="salesorders" type="button">
+              <span class="nav-item-title">Pedidos de venta</span>
+              <span class="nav-item-sub">Cabecera de pedidos</span>
+            </button>
+            <button class="nav-item" data-module="salesitems" type="button">
+              <span class="nav-item-title">Ítems de pedido</span>
+              <span class="nav-item-sub">Detalle de líneas</span>
+            </button>
+          </details>
 
-        <details class="nav-group">
-          <summary>Técnico</summary>
-          <button class="nav-item" data-module="catalog" type="button">
-            <span class="nav-item-title">Vista técnica CAP</span>
-            <span class="nav-item-sub">Servicios y Fiori preview</span>
-          </button>
-        </details>
-      </nav>
+          <details class="nav-group">
+            <summary>Configuración</summary>
+            <button class="nav-item" data-module="company" type="button">
+              <span class="nav-item-title">Empresa</span>
+              <span class="nav-item-sub">Datos generales</span>
+            </button>
+            <button class="nav-item" data-module="catalog" type="button">
+              <span class="nav-item-title">Vista técnica</span>
+              <span class="nav-item-sub">OData Preview</span>
+            </button>
+          </details>
+        </div> </nav>
 
       <main class="shell-content">
         <div class="content-header">
@@ -113,59 +146,46 @@
 
         <section id="welcome-panel" class="welcome-panel">
           <p class="welcome-lead">
-            Sistema ERP Modular: Gestión comercial, logística y <strong>Recursos Humanos</strong>.
+            Bienvenido, <strong id="welcome-user"></strong>. Selecciona un módulo para comenzar.
           </p>
 
           <div class="welcome-grid">
             
-            <article class="welcome-card" data-module="employees" role="button" tabindex="0" style="border-top: 4px solid #9c27b0;">
-              <h2 style="color:#9c27b0;">Colaboradores</h2>
-              <h3>Gestión de Personal</h3>
-              <p>
-                Ficha del empleado: Vendedores, Bodegueros y Administrativos. 
-                Control de RUT, contacto y asignación de roles.
-              </p>
-            </article>
-
-            <article class="welcome-card" data-module="payroll" role="button" tabindex="0" style="border-top: 4px solid #9c27b0;">
-              <h2 style="color:#9c27b0;">Remuneraciones</h2>
-              <h3>Nómina y Pagos</h3>
-              <p>
-                Procesamiento mensual de sueldos, cálculo de horas extra (HHEE),
-                bonos por ventas y descuentos legales.
-              </p>
-            </article>
-
-            <article class="welcome-card" data-module="customers" role="button" tabindex="0">
-              <h2>Clientes</h2>
-              <h3>Maestro de clientes</h3>
-              <p>Base de datos de clientes, direcciones y estado comercial.</p>
-            </article>
-
-            <article class="welcome-card" data-module="products" role="button" tabindex="0">
-              <h2>Productos</h2>
-              <h3>Catálogo</h3>
-              <p>Gestión de SKUs, precios y atributos de productos.</p>
-            </article>
-
-            <article class="welcome-card" data-module="inventory" role="button" tabindex="0">
-              <h2>Inventario</h2>
-              <h3>Logística</h3>
-              <p>Control de existencias, Kardex y movimientos de bodega.</p>
-            </article>
-
-            <article class="welcome-card" data-module="purchasing" role="button" tabindex="0">
-              <h2>Compras</h2>
-              <h3>Aprovisionamiento</h3>
-              <p>Gestión de proveedores y recepción de mercadería.</p>
-            </article>
-
-            <article class="welcome-card" data-module="salesorders" role="button" tabindex="0">
-              <h2>Ventas</h2>
+            <article class="welcome-card" data-module="salesorders" role="button" tabindex="0" style="border-top: 4px solid #cc0000;">
+              <h2 style="color:#cc0000;">Ventas</h2>
               <h3>Comercial</h3>
-              <p>Generación de pedidos de venta y facturación.</p>
+              <p>Generación de pedidos de venta.</p>
+            </article>
+            
+            <article class="welcome-card" data-module="inventory" role="button" tabindex="0" style="border-top: 4px solid #3d9d4d;">
+              <h2 style="color:#3d9d4d;">Inventario</h2>
+              <h3>Logística</h3>
+              <p>Kardex y control de stock.</p>
             </article>
 
+            <article class="welcome-card" data-module="purchasing" role="button" tabindex="0" style="border-top: 4px solid #0056b3;">
+              <h2 style="color:#0056b3;">Compras</h2>
+              <h3>Aprovisionamiento</h3>
+              <p>Gestión de proveedores y recepción.</p>
+            </article>
+
+            <article class="welcome-card" data-module="employees" role="button" tabindex="0" style="border-top: 4px solid #9c27b0;">
+              <h2 style="color:#9c27b0;">RRHH</h2>
+              <h3>Personal</h3>
+              <p>Gestión de colaboradores y roles.</p>
+            </article>
+
+            <article class="welcome-card" data-module="customers" role="button" tabindex="0" style="border-top: 4px solid #ff9800;">
+              <h2 style="color:#ff9800;">Clientes</h2>
+              <h3>Maestros</h3>
+              <p>Base de datos maestra de clientes y datos comerciales.</p>
+            </article>
+
+            <article class="welcome-card" data-module="products" role="button" tabindex="0" style="border-top: 4px solid #00bcd4;">
+              <h2 style="color:#00bcd4;">Productos</h2>
+              <h3>Maestros</h3>
+              <p>Catálogo de productos y lista de materiales (BOM).</p>
+            </article>
           </div>
         </section>
 
@@ -174,71 +194,66 @@
     </div>
 
     <footer class="shell-footer">
-      <span>ERP CAP On-Prem &mdash; Demo educativa</span>
-      <span>Sprint 6: Recursos Humanos</span>
+      <span>ERP CAP On-Prem &mdash; 2025 v1.0.0  Antonio Avezon S.</span>
+      <span>CAP Node.js &bull; PostgreSQL on Docker &bull; Fiori preview</span>
     </footer>
   </div>
 
   <script type="module">
-    const moduleRegistry = {
-      // --- RRHH (NUEVO SPRINT 6) ---
-      employees: {
-        title: 'Ficha de Colaboradores',
-        loader: () => import('./modules/employees.js')
-      },
-      contracts: {
-        title: 'Contratos y Datos Legales',
-        loader: () => import('./modules/contracts.js')
-      },
-      payroll: {
-        title: 'Remuneraciones y Nómina',
-        loader: () => import('./modules/payroll.js')
-      },
+    // --- LÓGICA DE SESIÓN Y TOGGLE ---
+    
+    function doLogout() {
+      sessionStorage.clear();
+      window.location.href = '/login.html';
+    }
 
-      // --- MAESTROS ---
-      customers: {
-        title: 'Clientes',
-        loader: () => import('./modules/customers.js')
-      },
-      products: {
-        title: 'Productos',
-        loader: () => import('./modules/products.js')
-      },
+    // 1. Manejo del Sidebar Toggle
+    const sidebar = document.getElementById('shell-sidebar');
+    const toggleButton = document.getElementById('menu-toggle');
+    
+    let isCollapsed = false;
+
+    toggleButton.addEventListener('click', () => {
+      isCollapsed = !isCollapsed;
+      sidebar.classList.toggle('is-collapsed', isCollapsed);
+      toggleButton.innerHTML = isCollapsed ? '>' : '☰'; 
+      toggleButton.title = isCollapsed ? 'Expandir' : 'Contraer';
       
-      // --- COMPRAS ---
-      suppliers: {
-        title: 'Proveedores',
-        loader: () => import('./modules/suppliers.js')
-      },
-      purchasing: {
-        title: 'Gestión de Compras',
-        loader: () => import('./modules/purchasing.js')
-      },
-
-      // --- LOGÍSTICA ---
-      inventory: {
-        title: 'Inventario y Stock',
-        loader: () => import('./modules/inventory.js')
-      },
-
-      // --- VENTAS ---
-      salesorders: {
-        title: 'Pedidos de venta',
-        loader: () => import('./modules/salesorders.js')
-      },
-      salesitems: {
-        title: 'Ítems de pedido',
-        loader: () => import('./modules/salesitems.js')
-      },
-
-      // --- TÉCNICO ---
-      catalog: {
-        title: 'Vista técnica CAP',
-        loader: () => import('./modules/tech.js')
+      if (isCollapsed) {
+          sidebar.querySelectorAll('.nav-group').forEach(group => group.open = false);
       }
+    });
+
+
+    // 2. Seguridad y Renderizado de UI (HEADER)
+    const rawUser = sessionStorage.getItem('erp_user');
+    
+    const formattedUser = rawUser ? (rawUser.charAt(0).toUpperCase() + rawUser.slice(1).toLowerCase()) : 'Usuario';
+
+    document.getElementById('header-username').textContent = formattedUser;
+    document.getElementById('welcome-user').textContent = formattedUser;
+    
+    // Eventos Logout (Header es la única fuente de logout)
+    document.getElementById('header-btn-logout').addEventListener('click', doLogout);
+
+
+    // --- REGISTRO DE MÓDULOS ---
+    const moduleRegistry = {
+      customers: { title: 'Clientes', loader: () => import('./modules/customers.js') },
+      products: { title: 'Productos', loader: () => import('./modules/products.js') },
+      employees: { title: 'Ficha de Colaboradores', loader: () => import('./modules/employees.js') },
+      contracts: { title: 'Contratos', loader: () => import('./modules/contracts.js') },
+      payroll: { title: 'Remuneraciones', loader: () => import('./modules/payroll.js') },
+      suppliers: { title: 'Proveedores', loader: () => import('./modules/suppliers.js') },
+      purchasing: { title: 'Gestión de Compras', loader: () => import('./modules/purchasing.js') },
+      inventory: { title: 'Inventario', loader: () => import('./modules/inventory.js') },
+      salesorders: { title: 'Pedidos de venta', loader: () => import('./modules/salesorders.js') },
+      salesitems: { title: 'Ítems de pedido', loader: () => import('./modules/salesitems.js') },
+      company: { title: 'Configuración Empresa', loader: () => import('./modules/company.js') },
+      catalog: { title: 'Vista técnica', loader: () => import('./modules/tech.js') }
     };
 
-    const navItems     = document.querySelectorAll('.nav-item');
+    const navItems     = document.querySelectorAll('.nav-item[data-module]');
     const titleEl      = document.getElementById('content-title');
     const welcomePanel = document.getElementById('welcome-panel');
     const modulePanel  = document.getElementById('module-panel');
@@ -269,47 +284,28 @@
       backBtn.classList.remove('hidden');
       setActiveNav(triggerButton);
 
-      modulePanel.innerHTML = `
-        <div class="module-loading">
-          Cargando módulo <strong>${entry.title}</strong>...
-        </div>
-      `;
+      modulePanel.innerHTML = `<div class="module-loading">Cargando ${entry.title}...</div>`;
 
       if (!entry.loader) {
-        modulePanel.innerHTML = `
-          <div class="module-placeholder">
-            <h2>${entry.title}</h2>
-            <p>Este módulo está en construcción (Sprint 6 en progreso).</p>
-          </div>
-        `;
+        modulePanel.innerHTML = `<div class="module-placeholder">En construcción.</div>`;
         return;
       }
 
       try {
         const mod = await entry.loader();
-        if (!mod || typeof mod.render !== 'function') {
-          throw new Error('El módulo no exporta una función render(host)');
-        }
         modulePanel.innerHTML = '';
         mod.render(modulePanel);
       } catch (err) {
         console.error(err);
-        modulePanel.innerHTML = `
-          <div class="module-error">
-            <h2>Error al cargar el módulo</h2>
-            <p>${entry.title}</p>
-            <pre>${err.message}</pre>
-            <p>Verifica que hayas creado los archivos JS correspondientes.</p>
-          </div>
-        `;
+        modulePanel.innerHTML = `<div class="module-error">Error al cargar: ${err.message}</div>`;
       }
     }
 
     navItems.forEach((btn) => {
       btn.addEventListener('click', () => {
         const module = btn.dataset.module;
-        if (module === 'home') { showHome(); } 
-        else { openModule(module, btn); }
+        if (module === 'home') showHome();
+        else openModule(module, btn);
       });
     });
 
@@ -318,12 +314,6 @@
         const module = card.dataset.module;
         const btn = document.querySelector(`.nav-item[data-module="${module}"]`);
         openModule(module, btn || null);
-      });
-      card.addEventListener('keydown', (ev) => {
-        if (ev.key === 'Enter' || ev.key === ' ') {
-          ev.preventDefault();
-          card.click();
-        }
       });
     });
 

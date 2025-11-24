@@ -1,6 +1,8 @@
 // app/modules/payroll.js
 // Módulo Remuneraciones – Cálculo de Nómina
 
+import { apiFetch } from './utils.js'; // <--- FETCH SEGURO
+
 export const title = 'Remuneraciones y Nómina';
 
 const API_PAYROLLS  = '/catalog/Payrolls';
@@ -17,6 +19,18 @@ function loadStyles() {
 }
 
 export function render(host) {
+  // --- 1. VALIDACIÓN DE ROL (Seguridad Extra) ---
+  const userRole = sessionStorage.getItem('erp_role');
+  if (userRole !== 'ADMIN') {
+    host.innerHTML = `
+      <div style="text-align:center; padding:50px; color:#c62828;">
+        <h2>⛔ Acceso Denegado</h2>
+        <p>La información de remuneraciones es confidencial.</p>
+      </div>
+    `;
+    return;
+  }
+
   loadStyles();
 
   const state = {
@@ -145,14 +159,11 @@ export function render(host) {
   const btnSave = host.querySelector('#btn-save');
   const selEmployee = form.elements.employee_ID;
 
-  // --- LÓGICA ---
-
   async function loadData() {
     try {
-      // Expandimos employee para ver el nombre en la tabla
       const [resPay, resEmp] = await Promise.all([
-        fetch(`${API_PAYROLLS}?$expand=employee&$orderby=period desc`),
-        fetch(`${API_EMPLOYEES}?$orderby=lastName asc`)
+        apiFetch(`${API_PAYROLLS}?$expand=employee&$orderby=period desc`),
+        apiFetch(`${API_EMPLOYEES}?$orderby=lastName asc`)
       ]);
 
       const dPay = await resPay.json();
@@ -173,7 +184,6 @@ export function render(host) {
     const sorted = [...state.list].sort((a, b) => {
       let valA = a[state.sortKey] || '';
       let valB = b[state.sortKey] || '';
-      
       if (valA < valB) return state.sortDir === 'asc' ? -1 : 1;
       if (valA > valB) return state.sortDir === 'asc' ? 1 : -1;
       return 0;
@@ -189,10 +199,7 @@ export function render(host) {
       const empName = p.employee ? `${p.employee.lastName}, ${p.employee.firstName}` : 'Desconocido';
       const baseFmt = formatMoney(p.baseSalary);
       const liquidFmt = formatMoney(p.totalLiquid);
-      
-      const statusBadge = p.isPaid 
-        ? `<span class="status-paid">Pagado</span>` 
-        : `<span class="status-pending">Pendiente</span>`;
+      const statusBadge = p.isPaid ? `<span class="status-paid">Pagado</span>` : `<span class="status-pending">Pendiente</span>`;
 
       const tr = document.createElement('tr');
       tr.innerHTML = `
@@ -234,13 +241,11 @@ export function render(host) {
     });
   }
 
-  // --- CÁLCULO AUTOMÁTICO ---
   function autoCalculate() {
     const base = parseFloat(form.elements.baseSalary.value) || 0;
     const bonuses = parseFloat(form.elements.bonuses.value) || 0;
     const overtime = parseFloat(form.elements.overtimeAmount.value) || 0;
     const discounts = parseFloat(form.elements.discounts.value) || 0;
-
     const liquid = (base + bonuses + overtime) - discounts;
     form.elements.totalLiquid.value = liquid.toFixed(2);
   }
@@ -255,7 +260,6 @@ export function render(host) {
       state.isEditing = false;
       form.reset();
       form.elements.id.value = '';
-      // Default Periodo Actual
       const now = new Date();
       const month = (now.getMonth() + 1).toString().padStart(2, '0');
       form.elements.period.value = `${now.getFullYear()}-${month}`;
@@ -281,15 +285,10 @@ export function render(host) {
   function checkValidity() {
     const hasPeriod = !!form.elements.period.value;
     const hasEmp = !!form.elements.employee_ID.value;
-    
-    if (hasPeriod && hasEmp) {
-      btnSave.removeAttribute('disabled');
-    } else {
-      btnSave.setAttribute('disabled', 'true');
-    }
+    if (hasPeriod && hasEmp) btnSave.removeAttribute('disabled');
+    else btnSave.setAttribute('disabled', 'true');
   }
 
-  // --- Eventos ---
   host.querySelectorAll('th[data-sort]').forEach(th => {
     th.addEventListener('click', () => {
       const key = th.dataset.sort;
@@ -303,16 +302,12 @@ export function render(host) {
   host.querySelector('#btn-new').addEventListener('click', () => toggleForm(true, 'new'));
   host.querySelector('#btn-cancel').addEventListener('click', () => toggleForm(false));
   
-  form.addEventListener('input', () => {
-    autoCalculate(); // Calcular siempre al escribir
-    checkValidity();
-  });
+  form.addEventListener('input', () => { autoCalculate(); checkValidity(); });
   form.addEventListener('change', checkValidity);
 
   form.addEventListener('submit', async (ev) => {
     ev.preventDefault();
     const formData = new FormData(form);
-    
     const payload = {
       period: formData.get('period'),
       employee_ID: formData.get('employee_ID'),
@@ -363,7 +358,6 @@ export function render(host) {
   loadData();
 }
 
-// Helpers
 function escapeHtml(text) {
   if (!text) return '';
   return text.toString().replace(/</g, "&lt;");
@@ -379,15 +373,17 @@ function showToast(msg) {
   document.body.appendChild(div);
   setTimeout(() => div.remove(), 3000);
 }
+
+// --- API SEGURO ---
 async function apiCreate(data) {
-  const res = await fetch(API_PAYROLLS, {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(data)});
+  const res = await apiFetch(API_PAYROLLS, {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(data)});
   if (!res.ok) throw new Error(await res.text());
 }
 async function apiUpdate(id, data) {
-  const res = await fetch(`${API_PAYROLLS}/${id}`, {method: 'PATCH', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(data)});
+  const res = await apiFetch(`${API_PAYROLLS}/${id}`, {method: 'PATCH', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(data)});
   if (!res.ok) throw new Error(await res.text());
 }
 async function apiDelete(id) {
-  const res = await fetch(`${API_PAYROLLS}/${id}`, {method: 'DELETE'});
+  const res = await apiFetch(`${API_PAYROLLS}/${id}`, {method: 'DELETE'});
   if (!res.ok) throw new Error(await res.text());
 }

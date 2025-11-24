@@ -5,7 +5,9 @@
   "dependencies": {
     "@cap-js/postgres": "^2.0.6",
     "@sap/cds": "^9",
-    "express": "^4"
+    "bcrypt": "^6.0.0",
+    "express": "^4",
+    "jsonwebtoken": "^9.0.2"
   },
   "devDependencies": {
     "@cap-js/sqlite": "^2"

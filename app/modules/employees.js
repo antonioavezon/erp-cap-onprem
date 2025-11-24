@@ -1,6 +1,8 @@
 // app/modules/employees.js
 // Módulo Colaboradores (Staff Directory)
 
+import { apiFetch } from './utils.js'; // <--- FETCH SEGURO
+
 export const title = 'Ficha de Colaboradores';
 
 const API_ROOT = '/catalog/Employees';
@@ -16,6 +18,18 @@ function loadStyles() {
 }
 
 export function render(host) {
+  // --- 1. VALIDACIÓN DE ROL (Seguridad Extra) ---
+  const userRole = sessionStorage.getItem('erp_role');
+  if (userRole !== 'ADMIN') {
+    host.innerHTML = `
+      <div style="text-align:center; padding:50px; color:#c62828;">
+        <h2>⛔ Acceso Denegado</h2>
+        <p>Solo los administradores pueden gestionar el personal.</p>
+      </div>
+    `;
+    return; // Detener ejecución
+  }
+
   loadStyles();
 
   const state = {
@@ -133,7 +147,7 @@ export function render(host) {
 
   async function loadData() {
     try {
-      const res = await fetch(`${API_ROOT}?$orderby=lastName asc`);
+      const res = await apiFetch(`${API_ROOT}?$orderby=lastName asc`);
       const data = await res.json();
       state.list = data.value || [];
       renderTable();
@@ -162,7 +176,6 @@ export function render(host) {
       const fullName = `${emp.firstName} ${emp.lastName}`;
       const initials = getInitials(emp.firstName, emp.lastName);
       
-      // Estilo Rol
       let badgeClass = 'role-admin';
       let roleLabel = emp.role || '-';
       if (emp.role === 'SALES') { badgeClass = 'role-sales'; roleLabel = 'Vendedor'; }
@@ -328,15 +341,25 @@ function showToast(msg) {
   document.body.appendChild(div);
   setTimeout(() => div.remove(), 3000);
 }
+
+// --- API SEGURO ---
 async function apiCreate(data) {
-  const res = await fetch(API_ROOT, {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(data)});
+  const res = await apiFetch(API_ROOT, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(data)
+  });
   if (!res.ok) throw new Error(await res.text());
 }
 async function apiUpdate(id, data) {
-  const res = await fetch(`${API_ROOT}/${id}`, {method: 'PATCH', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(data)});
+  const res = await apiFetch(`${API_ROOT}/${id}`, {
+    method: 'PATCH',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(data)
+  });
   if (!res.ok) throw new Error(await res.text());
 }
 async function apiDelete(id) {
-  const res = await fetch(`${API_ROOT}/${id}`, {method: 'DELETE'});
+  const res = await apiFetch(`${API_ROOT}/${id}`, { method: 'DELETE' });
   if (!res.ok) throw new Error(await res.text());
 }
