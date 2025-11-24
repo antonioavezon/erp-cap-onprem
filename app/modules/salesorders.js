@@ -1,12 +1,14 @@
 // app/modules/salesorders.js
 // Módulo Pedidos de venta – Versión Profesional con RRHH
 
+import { apiFetch } from './utils.js'; // <--- FETCH SEGURO
+
 export const title = 'Pedidos de venta';
 
 const API_ORDERS     = '/catalog/SalesOrders';
 const API_CUSTOMERS  = '/catalog/Customers';
 const API_CURRENCIES = '/catalog/Currencies';
-const API_EMPLOYEES  = '/catalog/Employees'; // <--- NUEVO: Cargar vendedores
+const API_EMPLOYEES  = '/catalog/Employees'; // Cargar vendedores
 const CSS_PATH       = './modules/salesorders.css';
 
 function loadStyles() {
@@ -26,9 +28,9 @@ export function render(host) {
     list: [],
     customers: [],
     currencies: [],
-    employees: [], // <--- Lista de personal
-    custMap: {},   // Mapa ID -> Nombre Cliente
-    empMap: {},    // Mapa ID -> Nombre Vendedor
+    employees: [], 
+    custMap: {},
+    empMap: {},
     sortKey: 'orderDate',
     sortDir: 'desc',
     isEditing: false
@@ -58,7 +60,8 @@ export function render(host) {
                 <tr>
                   <th data-sort="orderNo">N° Pedido <span class="sort-icon"></span></th>
                   <th data-sort="customer_ID">Cliente <span class="sort-icon"></span></th>
-                  <th data-sort="salesPerson_ID">Vendedor <span class="sort-icon"></span></th> <th data-sort="orderDate">Fecha <span class="sort-icon"></span></th>
+                  <th data-sort="salesPerson_ID">Vendedor <span class="sort-icon"></span></th>
+                  <th data-sort="orderDate">Fecha <span class="sort-icon"></span></th>
                   <th data-sort="status">Estado <span class="sort-icon"></span></th>
                   <th data-sort="totalAmount">Total <span class="sort-icon"></span></th>
                   <th style="width: 110px; text-align:center;">Acciones</th>
@@ -149,30 +152,28 @@ export function render(host) {
     </div>
   `;
 
-  // DOM Refs
   const tbody = host.querySelector('#order-table-body');
   const formPanel = host.querySelector('#order-form-panel');
   const form = host.querySelector('#order-form');
   const formTitle = host.querySelector('#form-title');
   const btnSave = host.querySelector('#btn-save');
   
-  // Selects
   const selCustomer = form.elements.customer_ID;
   const selCurrency = form.elements.currency_code;
-  const selSalesPerson = form.elements.salesPerson_ID; // <--- Ref nuevo select
+  const selSalesPerson = form.elements.salesPerson_ID;
 
   // ============================================================
   // LÓGICA
   // ============================================================
 
-  // 1. Cargar Datos
   async function loadData() {
     try {
+      // USAR APIFETCH
       const [resOrders, resCust, resCurr, resEmp] = await Promise.all([
-        fetch(`${API_ORDERS}?$orderby=orderDate desc`),
-        fetch(`${API_CUSTOMERS}?$orderby=name asc`),
-        fetch(`${API_CURRENCIES}?$orderby=code asc`),
-        fetch(`${API_EMPLOYEES}?$orderby=lastName asc`)
+        apiFetch(`${API_ORDERS}?$orderby=orderDate desc`),
+        apiFetch(`${API_CUSTOMERS}?$orderby=name asc`),
+        apiFetch(`${API_CURRENCIES}?$orderby=code asc`),
+        apiFetch(`${API_EMPLOYEES}?$orderby=lastName asc`)
       ]);
 
       const dOrders = await resOrders.json();
@@ -205,7 +206,6 @@ export function render(host) {
     }
   }
 
-  // 2. Dibujar Tabla
   function renderTable() {
     const sortedList = [...state.list].sort((a, b) => {
       let valA = a[state.sortKey];
@@ -236,16 +236,15 @@ export function render(host) {
 
     sortedList.forEach(o => {
       const custName = state.custMap[o.customer_ID] || 'Cliente desconocido';
-      const sellerName = state.empMap[o.salesPerson_ID] || '-'; // Nombre Vendedor
+      const sellerName = state.empMap[o.salesPerson_ID] || '-'; 
       const dateFmt = formatDate(o.orderDate);
       const totalFmt = o.totalAmount != null 
         ? `${Number(o.totalAmount).toLocaleString('es-CL', { minimumFractionDigits: 2 })} ${o.currency_code}`
         : '-';
 
-      // Estado con colores
       let statusStyle = 'color:#555;';
       if (o.status === 'ABIERTO') statusStyle = 'color:#0056b3; font-weight:bold;';
-      if (o.status === 'CONFIRMED') statusStyle = 'color:#2e7d32; font-weight:bold;'; // Status confirmado por submit
+      if (o.status === 'CONFIRMED') statusStyle = 'color:#2e7d32; font-weight:bold;';
       if (o.status === 'CERRADO') statusStyle = 'color:#555;';
       if (o.status === 'CANCELADO') statusStyle = 'color:#d00;';
 
@@ -286,9 +285,7 @@ export function render(host) {
     });
   }
 
-  // 3. Actualizar Selects
   function updateSelects() {
-    // Clientes
     selCustomer.innerHTML = '<option value="">-- Seleccione Cliente --</option>';
     state.customers.forEach(c => {
       const opt = document.createElement('option');
@@ -297,7 +294,6 @@ export function render(host) {
       selCustomer.appendChild(opt);
     });
 
-    // Monedas
     selCurrency.innerHTML = '<option value="">-- Moneda --</option>';
     state.currencies.forEach(curr => {
       const opt = document.createElement('option');
@@ -306,10 +302,8 @@ export function render(host) {
       selCurrency.appendChild(opt);
     });
 
-    // Vendedores (Empleados)
     selSalesPerson.innerHTML = '<option value="">-- Quién vende --</option>';
     state.employees.forEach(e => {
-      // Filtro opcional: Podríamos filtrar por e.role === 'SALES'
       const opt = document.createElement('option');
       opt.value = e.ID;
       opt.textContent = `${e.firstName} ${e.lastName} (${e.role || 'Staff'})`;
@@ -317,7 +311,6 @@ export function render(host) {
     });
   }
 
-  // 4. Formulario
   function toggleForm(show, mode = 'new', data = null) {
     if (!show) {
       formPanel.classList.add('hidden');
@@ -334,7 +327,6 @@ export function render(host) {
       state.isEditing = false;
       form.reset();
       form.elements.id.value = '';
-      // Default: Hoy
       form.elements.orderDate.value = new Date().toISOString().slice(0, 10);
       form.elements.status.value = 'ABIERTO';
       if(state.currencies.find(c=>c.code==='CLP')) form.elements.currency_code.value = 'CLP';
@@ -346,7 +338,7 @@ export function render(host) {
       form.elements.id.value = data.ID;
       form.elements.orderNo.value = data.orderNo || '';
       form.elements.customer_ID.value = data.customer_ID || '';
-      form.elements.salesPerson_ID.value = data.salesPerson_ID || ''; // Cargar vendedor
+      form.elements.salesPerson_ID.value = data.salesPerson_ID || '';
       form.elements.orderDate.value = data.orderDate ? data.orderDate.slice(0,10) : '';
       form.elements.status.value = data.status || 'ABIERTO';
       form.elements.currency_code.value = data.currency_code || '';
@@ -358,7 +350,7 @@ export function render(host) {
   function checkValidity() {
     const hasNo = !!form.elements.orderNo.value.trim();
     const hasCust = !!form.elements.customer_ID.value;
-    const hasSeller = !!form.elements.salesPerson_ID.value; // Validar Vendedor
+    const hasSeller = !!form.elements.salesPerson_ID.value;
     const hasDate = !!form.elements.orderDate.value;
     const hasCurr = !!form.elements.currency_code.value;
 
@@ -368,8 +360,6 @@ export function render(host) {
       btnSave.setAttribute('disabled', 'true');
     }
   }
-
-  // --- Event Listeners ---
 
   host.querySelectorAll('th[data-sort]').forEach(th => {
     th.addEventListener('click', () => {
@@ -398,7 +388,7 @@ export function render(host) {
     const payload = {
       orderNo: formData.get('orderNo').trim(),
       customer_ID: formData.get('customer_ID'),
-      salesPerson_ID: formData.get('salesPerson_ID'), // Enviar Vendedor
+      salesPerson_ID: formData.get('salesPerson_ID'),
       orderDate: formData.get('orderDate'),
       status: formData.get('status'),
       currency_code: formData.get('currency_code'),
@@ -428,7 +418,6 @@ export function render(host) {
     const action = btn.dataset.action;
     const id = btn.dataset.id;
 
-    // Acción SUBMIT (Confirmar Venta)
     if (action === 'submit') {
       if (confirm('¿Confirmar venta? Se descontará el stock y no podrá editarse.')) {
         try {
@@ -459,8 +448,6 @@ export function render(host) {
   loadData();
 }
 
-// --- Helpers ---
-
 function escapeHtml(text) {
   if (!text) return '';
   return text.toString().replace(/</g, "&lt;");
@@ -479,27 +466,27 @@ function showToast(msg) {
   setTimeout(() => div.remove(), 3000);
 }
 
-// API
+// --- API SEGURO (USANDO apiFetch) ---
+
 async function apiCreate(data) {
-  const res = await fetch(API_ORDERS, {
+  const res = await apiFetch(API_ORDERS, {
     method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(data)
   });
   if (!res.ok) throw new Error(await res.text());
 }
 async function apiUpdate(id, data) {
-  const res = await fetch(`${API_ORDERS}/${id}`, {
+  const res = await apiFetch(`${API_ORDERS}/${id}`, {
     method: 'PATCH', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(data)
   });
   if (!res.ok) throw new Error(await res.text());
 }
 async function apiDelete(id) {
-  const res = await fetch(`${API_ORDERS}/${id}`, { method: 'DELETE' });
+  const res = await apiFetch(`${API_ORDERS}/${id}`, { method: 'DELETE' });
   if (!res.ok) throw new Error(await res.text());
 }
 
-// Acción Bound Submit
 async function apiSubmitOrder(id) {
-  const res = await fetch(`${API_ORDERS}/${id}/CatalogService.submit`, {
+  const res = await apiFetch(`${API_ORDERS}/${id}/CatalogService.submit`, {
     method: 'POST', 
     headers: {'Content-Type': 'application/json'}, 
     body: JSON.stringify({})

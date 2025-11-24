@@ -185,3 +185,33 @@ entity StockMovements : cuid, managed {
   
   date         : DateTime default $now;
 }
+
+/**
+ * ===========================================================
+ * MÓDULO DE CONFIGURACIÓN (Settings) - SPRINT 6.5
+ * ===========================================================
+ */
+
+entity CompanySettings : managed {
+  key ID       : String(1) default '1'; // Siempre será el registro '1'
+  name         : String(120);           // Nombre de Fantasía (ej: Mi Tienda)
+  businessName : String(120);           // Razón Social (ej: Inversiones SpA)
+  taxNumber    : String(30);            // RUT empresa
+  address      : String(200);
+  contactEmail : String(120);
+  currency     : Currency;              // Moneda base del sistema
+  logoUrl      : String(255);           // URL de la imagen del logo
+}
+
+/**
+ * ===========================================================
+ * MÓDULO DE SEGURIDAD (Auth)
+ * ===========================================================
+ */
+entity AppUsers : cuid, managed {
+  username     : String(50);
+  password     : String(100);
+  systemRole   : String(20);
+  employee     : Association to Employees; 
+  isActive     : Boolean default true;
+}

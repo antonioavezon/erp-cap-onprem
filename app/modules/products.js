@@ -1,14 +1,13 @@
 // app/modules/products.js
 // Módulo Productos – Versión Profesional (CSS Grid Layout)
 
+import { apiFetch } from './utils.js'; // <--- IMPORTAR FETCH SEGURO
+
 export const title = 'Productos';
 
 const API_ROOT = '/catalog/Products';
 const CSS_PATH = './modules/products.css';
 
-/**
- * Carga dinámica de estilos
- */
 function loadStyles() {
   if (!document.querySelector(`link[href="${CSS_PATH}"]`)) {
     const link = document.createElement('link');
@@ -18,9 +17,6 @@ function loadStyles() {
   }
 }
 
-/**
- * RENDER PRINCIPAL
- */
 export function render(host) {
   loadStyles();
 
@@ -31,7 +27,7 @@ export function render(host) {
     isEditing: false
   };
 
-  // --- Template HTML Profesional ---
+  // --- Template HTML ---
   host.innerHTML = `
     <div class="prod-module">
       
@@ -131,13 +127,12 @@ export function render(host) {
   const formTitle = host.querySelector('#form-title');
   const btnSave = host.querySelector('#btn-save');
 
-  // ============================================================
-  // LÓGICA DE NEGOCIO
-  // ============================================================
+  // --- Lógica ---
 
   async function loadData() {
     try {
-      const res = await fetch(`${API_ROOT}?$orderby=name asc`);
+      // USAR APIFETCH
+      const res = await apiFetch(`${API_ROOT}?$orderby=name asc`);
       const data = await res.json();
       state.list = data.value || [];
       renderTable();
@@ -219,7 +214,6 @@ export function render(host) {
     });
   }
 
-  // --- Gestión Formulario ---
   function toggleForm(show, mode = 'new', data = null) {
     if (!show) {
       formPanel.classList.add('hidden');
@@ -260,7 +254,6 @@ export function render(host) {
     }
   }
 
-  // --- Event Listeners ---
   host.querySelectorAll('th[data-sort]').forEach(th => {
     th.addEventListener('click', () => {
       const key = th.dataset.sort;
@@ -338,7 +331,6 @@ export function render(host) {
   loadData();
 }
 
-// --- Helpers ---
 function escapeHtml(text) {
   if (!text) return '';
   return text.toString().replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -352,8 +344,10 @@ function showToast(msg) {
   setTimeout(() => div.remove(), 3000);
 }
 
+// --- API SEGURO (USANDO apiFetch) ---
+
 async function apiCreate(data) {
-  const res = await fetch(API_ROOT, {
+  const res = await apiFetch(API_ROOT, {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
     body: JSON.stringify(data)
@@ -362,7 +356,7 @@ async function apiCreate(data) {
 }
 
 async function apiUpdate(id, data) {
-  const res = await fetch(`${API_ROOT}/${id}`, {
+  const res = await apiFetch(`${API_ROOT}/${id}`, {
     method: 'PATCH',
     headers: {'Content-Type': 'application/json'},
     body: JSON.stringify(data)
@@ -371,6 +365,6 @@ async function apiUpdate(id, data) {
 }
 
 async function apiDelete(id) {
-  const res = await fetch(`${API_ROOT}/${id}`, { method: 'DELETE' });
+  const res = await apiFetch(`${API_ROOT}/${id}`, { method: 'DELETE' });
   if (!res.ok) throw new Error(await res.text());
 }

@@ -1,11 +1,13 @@
 // app/modules/inventory.js
 // Módulo Inventario – Control de Stock y Movimientos
 
+import { apiFetch } from './utils.js'; // <--- FETCH SEGURO
+
 export const title = 'Inventario y Stock';
 
 const API_PRODUCTS  = '/catalog/Products';
 const API_MOVEMENTS = '/catalog/StockMovements';
-const API_EMPLOYEES = '/catalog/Employees'; // <--- NUEVO: Para cargar responsables
+const API_EMPLOYEES = '/catalog/Employees'; // Cargar responsables
 const CSS_PATH      = './modules/inventory.css';
 
 function loadStyles() {
@@ -20,10 +22,9 @@ function loadStyles() {
 export function render(host) {
   loadStyles();
 
-  // Estado local
   const state = {
     products: [],
-    employees: [], // <--- NUEVO: Lista de empleados
+    employees: [], // Lista de empleados
     sortKey: 'name',
     sortDir: 'asc',
     isFormVisible: false
@@ -123,25 +124,21 @@ export function render(host) {
     </div>
   `;
 
-  // Elementos DOM
   const tbody = host.querySelector('#inv-table-body');
   const formPanel = host.querySelector('#inv-form-panel');
   const form = host.querySelector('#inv-form');
   const btnSave = host.querySelector('#btn-save');
   const selProduct = form.elements.product_ID;
-  const selResponsible = form.elements.responsible_ID; // <--- Referencia al nuevo select
+  const selResponsible = form.elements.responsible_ID;
 
-  // ============================================================
-  // LÓGICA
-  // ============================================================
+  // --- LÓGICA ---
 
-  // 1. Cargar Productos y Empleados
   async function loadData() {
     try {
-      // Carga paralela
+      // Carga paralela segura
       const [resProd, resEmp] = await Promise.all([
-        fetch(`${API_PRODUCTS}?$orderby=name asc`),
-        fetch(`${API_EMPLOYEES}?$orderby=lastName asc`)
+        apiFetch(`${API_PRODUCTS}?$orderby=name asc`),
+        apiFetch(`${API_EMPLOYEES}?$orderby=lastName asc`)
       ]);
 
       const dataProd = await resProd.json();
@@ -151,14 +148,13 @@ export function render(host) {
       state.employees = dataEmp.value || [];
       
       renderTable();
-      updateSelects(); // <--- Llena ambos selects
+      updateSelects();
     } catch (err) {
       console.error(err);
       tbody.innerHTML = `<tr><td colspan="5" style="color:red; text-align:center;">Error al cargar datos</td></tr>`;
     }
   }
 
-  // 2. Renderizar Tabla
   function renderTable() {
     const sortedList = [...state.products].sort((a, b) => {
       let valA = a[state.sortKey];
@@ -227,7 +223,6 @@ export function render(host) {
     });
   }
 
-  // 3. Llenar Selects (Productos y Responsables)
   function updateSelects() {
     // Productos
     const currentProd = selProduct.value;
@@ -240,17 +235,12 @@ export function render(host) {
     });
     selProduct.value = currentProd;
 
-    // Responsables (Empleados)
+    // Responsables
     const currentResp = selResponsible.value;
     selResponsible.innerHTML = '<option value="">-- Quién Ajusta --</option>';
     state.employees.forEach(e => {
-      // Opcional: Mostrar el rol en el texto
-      let roleTxt = '';
-      if(e.role === 'WAREHOUSE') roleTxt = ' (Bodega)';
-      else if(e.role === 'ADMIN') roleTxt = ' (Admin)';
-      
-      // Solo mostramos empleados activos
       if (e.isActive) {
+        const roleTxt = e.role === 'WAREHOUSE' ? ' (Bodega)' : (e.role === 'ADMIN' ? ' (Admin)' : '');
         const opt = document.createElement('option');
         opt.value = e.ID;
         opt.textContent = `${e.firstName} ${e.lastName}${roleTxt}`;
@@ -260,7 +250,6 @@ export function render(host) {
     selResponsible.value = currentResp;
   }
 
-  // 4. Gestión del Formulario
   function toggleForm(show) {
     state.isFormVisible = show;
     if (show) {
@@ -276,7 +265,7 @@ export function render(host) {
     const hasProd = !!form.elements.product_ID.value;
     const hasQty = !!form.elements.quantity.value;
     const hasRef = !!form.elements.reference.value.trim();
-    const hasResp = !!form.elements.responsible_ID.value; // <--- Nueva validación
+    const hasResp = !!form.elements.responsible_ID.value;
 
     if (hasProd && hasQty && hasRef && hasResp) {
       btnSave.removeAttribute('disabled');
@@ -284,8 +273,6 @@ export function render(host) {
       btnSave.setAttribute('disabled', 'true');
     }
   }
-
-  // --- Eventos ---
 
   host.querySelectorAll('th[data-sort]').forEach(th => {
     th.addEventListener('click', () => {
@@ -307,18 +294,16 @@ export function render(host) {
   form.addEventListener('input', checkValidity);
   form.addEventListener('change', checkValidity);
 
-  // 5. Submit: Transacción manual con Responsable
   form.addEventListener('submit', async (ev) => {
     ev.preventDefault();
     const formData = new FormData(form);
     
     const prodId = formData.get('product_ID');
-    const type = formData.get('type'); // IN o OUT
+    const type = formData.get('type');
     const qty = parseInt(formData.get('quantity'));
     const ref = formData.get('reference');
-    const respId = formData.get('responsible_ID'); // <--- Capturamos ID
+    const respId = formData.get('responsible_ID');
 
-    // Validar stock suficiente para salidas
     const product = state.products.find(p => p.ID === prodId);
     if (type === 'OUT' && (product.stock || 0) < qty) {
       alert('Error: No hay suficiente stock para realizar esta salida.');
@@ -326,26 +311,23 @@ export function render(host) {
     }
 
     try {
-      // A) Crear Movimiento (Historial) INCLUYENDO AL RESPONSABLE
       await apiCreateMovement({
         product_ID: prodId,
         type: type,
         quantity: qty,
         reference: ref,
-        responsible_ID: respId, // <--- NEXO RRHH
+        responsible_ID: respId, // Enviamos el responsable
         date: new Date().toISOString()
       });
 
-      // B) Calcular nuevo stock
       const currentStock = product.stock || 0;
       const newStock = type === 'IN' ? (currentStock + qty) : (currentStock - qty);
 
-      // C) Actualizar Producto (Maestro)
       await apiUpdateProductStock(prodId, newStock);
 
       showToast('Movimiento registrado exitosamente');
       toggleForm(false);
-      loadData(); // Recargar tabla
+      loadData();
 
     } catch (err) {
       console.error(err);
@@ -355,8 +337,6 @@ export function render(host) {
 
   loadData();
 }
-
-// --- Helpers ---
 
 function escapeHtml(text) {
   if (!text) return '';
@@ -371,16 +351,16 @@ function showToast(msg) {
   setTimeout(() => div.remove(), 3000);
 }
 
-// API Calls
+// --- API SEGURO ---
 async function apiCreateMovement(data) {
-  const res = await fetch(API_MOVEMENTS, {
+  const res = await apiFetch(API_MOVEMENTS, {
     method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(data)
   });
   if (!res.ok) throw new Error(await res.text());
 }
 
 async function apiUpdateProductStock(id, newStock) {
-  const res = await fetch(`${API_PRODUCTS}/${id}`, {
+  const res = await apiFetch(`${API_PRODUCTS}/${id}`, {
     method: 'PATCH', 
     headers: {'Content-Type': 'application/json'}, 
     body: JSON.stringify({ stock: newStock })

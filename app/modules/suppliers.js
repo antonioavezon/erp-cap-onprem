@@ -1,6 +1,8 @@
 // app/modules/suppliers.js
 // Módulo Proveedores – CRUD contra /catalog/Suppliers
 
+import { apiFetch } from './utils.js'; // <--- FETCH SEGURO
+
 export const title = 'Proveedores';
 
 const API_ROOT = '/catalog/Suppliers';
@@ -149,7 +151,8 @@ export function render(host) {
 
   async function loadData() {
     try {
-      const res = await fetch(`${API_ROOT}?$orderby=name asc`);
+      // USAR APIFETCH
+      const res = await apiFetch(`${API_ROOT}?$orderby=name asc`);
       const data = await res.json();
       state.list = data.value || [];
       renderTable();
@@ -333,15 +336,22 @@ function showToast(msg) {
   document.body.appendChild(div);
   setTimeout(() => div.remove(), 3000);
 }
+
+// --- API SEGURO (USANDO apiFetch) ---
+
 async function apiCreate(data) {
-  const res = await fetch(API_ROOT, {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(data)});
+  const res = await apiFetch(API_ROOT, {
+    method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(data)
+  });
   if (!res.ok) throw new Error(await res.text());
 }
 async function apiUpdate(id, data) {
-  const res = await fetch(`${API_ROOT}/${id}`, {method: 'PATCH', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(data)});
+  const res = await apiFetch(`${API_ROOT}/${id}`, {
+    method: 'PATCH', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(data)
+  });
   if (!res.ok) throw new Error(await res.text());
 }
 async function apiDelete(id) {
-  const res = await fetch(`${API_ROOT}/${id}`, {method: 'DELETE'});
+  const res = await apiFetch(`${API_ROOT}/${id}`, { method: 'DELETE' });
   if (!res.ok) throw new Error(await res.text());
 }

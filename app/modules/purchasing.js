@@ -1,12 +1,14 @@
 // app/modules/purchasing.js
 // Módulo Compras – Cabeceras y Acción de Recepción
 
+import { apiFetch } from './utils.js'; // <--- FETCH SEGURO
+
 export const title = 'Gestión de Compras';
 
 const API_PURCHASE   = '/catalog/PurchaseOrders';
 const API_SUPPLIERS  = '/catalog/Suppliers';
 const API_CURRENCIES = '/catalog/Currencies';
-const API_EMPLOYEES  = '/catalog/Employees'; // <--- NUEVO: Para cargar compradores
+const API_EMPLOYEES  = '/catalog/Employees';
 const CSS_PATH       = './modules/purchasing.css';
 
 function loadStyles() {
@@ -25,9 +27,9 @@ export function render(host) {
     list: [],
     suppliers: [],
     currencies: [],
-    employees: [], // <--- Lista de personal
+    employees: [],
     suppMap: {},
-    empMap: {},    // Mapa ID -> Nombre empleado
+    empMap: {},
     sortKey: 'orderDate',
     sortDir: 'desc',
     isEditing: false
@@ -140,21 +142,20 @@ export function render(host) {
   const formTitle = host.querySelector('#form-title');
   const btnSave = host.querySelector('#btn-save');
   
-  // Referencias a Selects
   const selSupp = form.elements.supplier_ID;
   const selCurr = form.elements.currency_code;
-  const selBuyer = form.elements.buyer_ID; // <--- Referencia al nuevo select
+  const selBuyer = form.elements.buyer_ID;
 
   // --- LÓGICA ---
 
   async function loadData() {
     try {
-      // Cargar Compras, Proveedores, Monedas y Empleados
+      // USAR APIFETCH
       const [resPur, resSup, resCur, resEmp] = await Promise.all([
-        fetch(`${API_PURCHASE}?$orderby=orderDate desc`),
-        fetch(`${API_SUPPLIERS}?$orderby=name asc`),
-        fetch(`${API_CURRENCIES}?$orderby=code asc`),
-        fetch(`${API_EMPLOYEES}?$orderby=lastName asc`)
+        apiFetch(`${API_PURCHASE}?$orderby=orderDate desc`),
+        apiFetch(`${API_SUPPLIERS}?$orderby=name asc`),
+        apiFetch(`${API_CURRENCIES}?$orderby=code asc`),
+        apiFetch(`${API_EMPLOYEES}?$orderby=lastName asc`)
       ]);
 
       const dPur = await resPur.json();
@@ -167,7 +168,6 @@ export function render(host) {
       state.currencies = dCur.value || [];
       state.employees = dEmp.value || [];
 
-      // Mapas para visualización rápida en tabla
       state.suppMap = {};
       state.suppliers.forEach(s => state.suppMap[s.ID] = s.name);
       
@@ -202,16 +202,14 @@ export function render(host) {
 
     sorted.forEach(o => {
       const suppName = state.suppMap[o.supplier_ID] || 'Proveedor desconocido';
-      const buyerName = state.empMap[o.buyer_ID] || 'Sin asignar'; // Mostrar comprador
+      const buyerName = state.empMap[o.buyer_ID] || 'Sin asignar';
       const dateFmt = o.orderDate ? o.orderDate.slice(0,10) : '-';
       const totalFmt = o.totalAmount ? `${Number(o.totalAmount).toLocaleString()} ${o.currency_code}` : '-';
       
-      // Estilo Estado
       let stStyle = 'color:#555';
       if (o.status === 'RECEIVED') stStyle = 'color:#2e7d32; font-weight:bold;';
       if (o.status === 'CREATED') stStyle = 'color:#0056b3; font-weight:bold;';
 
-      // Botón Recibir (Solo si no está recibida)
       const btnReceive = o.status !== 'RECEIVED' 
         ? `<button class="btn tiny success" data-action="receive" data-id="${o.ID}" title="Recibir Mercadería">📦 Recibir</button>`
         : `<span style="font-size:0.8rem; color:green;">✔ Completado</span>`;
@@ -249,7 +247,6 @@ export function render(host) {
   }
 
   function updateSelects() {
-    // 1. Proveedores
     selSupp.innerHTML = '<option value="">-- Seleccione Proveedor --</option>';
     state.suppliers.forEach(s => {
       const opt = document.createElement('option');
@@ -258,7 +255,6 @@ export function render(host) {
       selSupp.appendChild(opt);
     });
 
-    // 2. Monedas
     selCurr.innerHTML = '<option value="">-- Moneda --</option>';
     state.currencies.forEach(c => {
       const opt = document.createElement('option');
@@ -267,10 +263,8 @@ export function render(host) {
       selCurr.appendChild(opt);
     });
 
-    // 3. Compradores (Empleados)
     selBuyer.innerHTML = '<option value="">-- Quién compra --</option>';
     state.employees.forEach(e => {
-      // Filtro opcional: solo mostrar Administrativos o Bodegueros si quisieras
       const opt = document.createElement('option');
       opt.value = e.ID;
       opt.textContent = `${e.firstName} ${e.lastName} (${e.role || 'Staff'})`;
@@ -301,7 +295,7 @@ export function render(host) {
       form.elements.orderNo.value = data.orderNo || '';
       form.elements.orderDate.value = data.orderDate ? data.orderDate.slice(0,10) : '';
       form.elements.supplier_ID.value = data.supplier_ID || '';
-      form.elements.buyer_ID.value = data.buyer_ID || ''; // Cargar comprador
+      form.elements.buyer_ID.value = data.buyer_ID || '';
       form.elements.status.value = data.status || 'CREATED';
       form.elements.currency_code.value = data.currency_code || '';
       form.elements.totalAmount.value = data.totalAmount || '';
@@ -310,18 +304,13 @@ export function render(host) {
   }
 
   function checkValidity() {
-    const hasNo = !!form.elements.orderNo.value.trim();
-    const hasSupp = !!form.elements.supplier_ID.value;
-    const hasBuyer = !!form.elements.buyer_ID.value; // Validar comprador
-
-    if (hasNo && hasSupp && hasBuyer) {
+    if (form.elements.orderNo.value.trim() && form.elements.supplier_ID.value && form.elements.buyer_ID.value) {
       btnSave.removeAttribute('disabled');
     } else {
       btnSave.setAttribute('disabled', 'true');
     }
   }
 
-  // --- Eventos ---
   host.querySelectorAll('th[data-sort]').forEach(th => {
     th.addEventListener('click', () => {
       const key = th.dataset.sort;
@@ -334,10 +323,7 @@ export function render(host) {
   host.querySelector('#btn-refresh').addEventListener('click', loadData);
   host.querySelector('#btn-new').addEventListener('click', () => toggleForm(true, 'new'));
   host.querySelector('#btn-cancel').addEventListener('click', () => toggleForm(false));
-  
-  // Validar inputs
   form.addEventListener('input', checkValidity);
-  form.addEventListener('change', checkValidity);
 
   form.addEventListener('submit', async (ev) => {
     ev.preventDefault();
@@ -346,7 +332,7 @@ export function render(host) {
       orderNo: formData.get('orderNo').trim(),
       orderDate: formData.get('orderDate'),
       supplier_ID: formData.get('supplier_ID'),
-      buyer_ID: formData.get('buyer_ID'), // Guardar comprador
+      buyer_ID: formData.get('buyer_ID'),
       status: 'CREATED', 
       currency_code: formData.get('currency_code'),
       notes: formData.get('notes')
@@ -398,7 +384,6 @@ export function render(host) {
   loadData();
 }
 
-// Helpers
 function escapeHtml(text) {
   if (!text) return '';
   return text.toString().replace(/</g, "&lt;");
@@ -411,23 +396,23 @@ function showToast(msg) {
   setTimeout(() => div.remove(), 3000);
 }
 
-// API
+// --- API SEGURO (USANDO apiFetch) ---
+
 async function apiCreate(data) {
-  const res = await fetch(API_PURCHASE, {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(data)});
+  const res = await apiFetch(API_PURCHASE, {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(data)});
   if (!res.ok) throw new Error(await res.text());
 }
 async function apiUpdate(id, data) {
-  const res = await fetch(`${API_PURCHASE}/${id}`, {method: 'PATCH', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(data)});
+  const res = await apiFetch(`${API_PURCHASE}/${id}`, {method: 'PATCH', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(data)});
   if (!res.ok) throw new Error(await res.text());
 }
 async function apiDelete(id) {
-  const res = await fetch(`${API_PURCHASE}/${id}`, {method: 'DELETE'});
+  const res = await apiFetch(`${API_PURCHASE}/${id}`, {method: 'DELETE'});
   if (!res.ok) throw new Error(await res.text());
 }
 
-// ACCIÓN DE NEGOCIO
 async function apiReceiveOrder(id) {
-  const res = await fetch(`${API_PURCHASE}/${id}/CatalogService.receive`, {
+  const res = await apiFetch(`${API_PURCHASE}/${id}/CatalogService.receive`, {
     method: 'POST', 
     headers: {'Content-Type': 'application/json'},
     body: JSON.stringify({}) 

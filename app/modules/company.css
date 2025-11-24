@@ -1,0 +1,167 @@
+/* app/modules/company.css */
+
+.comp-module {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  gap: 1rem;
+  animation: fadeIn 0.4s ease-out;
+  font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Header */
+.comp-header {
+  display: flex;
+  justify-content: flex-end;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #dde2e6;
+}
+
+/* Contenedor Principal Centrado */
+.comp-body {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  justify-content: center; /* Centrar la hoja */
+  padding: 20px;
+  background-color: #f4f6f8; /* Fondo gris suave */
+}
+
+/* Tarjeta tipo "Hoja" */
+.comp-card {
+  background: white;
+  width: 100%;
+  max-width: 800px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+/* Encabezado de la Tarjeta (Logo + Títulos) */
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+  border-bottom: 2px solid #f0f0f0;
+  padding-bottom: 30px;
+}
+
+.logo-preview {
+  width: 120px;
+  height: 120px;
+  border: 2px dashed #ccc;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background-color: #fafafa;
+}
+
+.logo-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.logo-placeholder {
+  color: #999;
+  font-size: 0.8rem;
+  text-align: center;
+  padding: 10px;
+}
+
+.company-titles h2 {
+  margin: 0;
+  color: #0056b3;
+  font-size: 1.8rem;
+}
+
+.company-titles h4 {
+  margin: 5px 0 0 0;
+  color: #666;
+  font-weight: normal;
+  font-size: 1.1rem;
+}
+
+/* Formulario */
+.comp-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.full-width { grid-column: span 2; }
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-group label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #444;
+  text-transform: uppercase;
+}
+
+.form-group input, .form-group select {
+  padding: 10px 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+  transition: all 0.2s;
+}
+
+.form-group input:focus {
+  border-color: #0056b3;
+  box-shadow: 0 0 0 3px rgba(0, 86, 179, 0.1);
+  outline: none;
+}
+
+/* Botones */
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 15px;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #eee;
+}
+
+.btn {
+  padding: 10px 24px;
+  border-radius: 4px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: background 0.2s;
+}
+
+.btn.primary { background-color: #0056b3; color: white; }
+.btn.primary:hover { background-color: #004494; }
+.btn.secondary { background-color: #e9ecef; color: #495057; }
+.btn.secondary:hover { background-color: #dde2e6; }
+
+/* Toast */
+.toast-success {
+  position: fixed; bottom: 20px; right: 20px; background: #2e7d32; color: white;
+  padding: 12px 24px; border-radius: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 9999; animation: slideUp 0.3s;
+}
+@keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
