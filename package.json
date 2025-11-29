@@ -18,6 +18,10 @@
   },
   "private": true,
   "cds": {
+    "server": {
+      "cors": true,
+      "host": "0.0.0.0"
+    },
     "requires": {
       "db": {
         "kind": "postgres",
