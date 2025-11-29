@@ -1,14 +1,13 @@
-// app/modules/company.js
-// Módulo Configuración – Datos de la Empresa (Singleton)
-
-import { apiFetch } from './utils.js'; // <--- IMPORTANTE: Importamos el fetch seguro
+import { apiFetch } from './utils.js';
 
 export const title = 'Configuración de Empresa';
 
-// Apuntamos directamente al ID '1' porque es un Singleton lógico
 const API_URL = '/catalog/CompanySettings(\'1\')';
 const API_CURRENCIES = '/catalog/Currencies';
 const CSS_PATH = './modules/company.css';
+
+// Variable local para guardar el Base64 actual
+let currentLogoBase64 = ''; 
 
 function loadStyles() {
   if (!document.querySelector(`link[href="${CSS_PATH}"]`)) {
@@ -22,18 +21,20 @@ function loadStyles() {
 export function render(host) {
   loadStyles();
 
-  // --- HTML Template ---
   host.innerHTML = `
     <div class="comp-module">
-      
       <div class="comp-body">
-        
         <div class="comp-card">
           
           <div class="card-header">
-            <div class="logo-preview" id="logo-container">
-              <span class="logo-placeholder">Sin Logo</span>
+            <div class="logo-wrapper">
+                <div class="logo-preview" id="logo-container" title="Click para cambiar logo">
+                    <span class="logo-placeholder">Sin Logo</span>
+                </div>
+                <input type="file" id="file-upload" accept="image/*" style="display: none;" />
+                <button type="button" class="btn-text" id="btn-trigger-upload">Cambiar Logo</button>
             </div>
+
             <div class="company-titles">
               <h2 id="display-name">Cargando...</h2>
               <h4 id="display-rut">...</h4>
@@ -42,15 +43,14 @@ export function render(host) {
 
           <form id="comp-form" class="comp-form" autocomplete="off">
             <div class="form-grid">
-              
               <div class="form-group">
                 <label>Nombre de Fantasía *</label>
-                <input name="name" required maxlength="120" placeholder="Ej: Mi Tienda" />
+                <input name="name" required maxlength="120" />
               </div>
 
               <div class="form-group">
                 <label>Razón Social *</label>
-                <input name="businessName" required maxlength="120" placeholder="Ej: Servicios SpA" />
+                <input name="businessName" required maxlength="120" />
               </div>
 
               <div class="form-group">
@@ -74,12 +74,6 @@ export function render(host) {
                   <option value="">Cargando...</option>
                 </select>
               </div>
-
-              <div class="form-group">
-                <label>URL del Logo (Imagen)</label>
-                <input name="logoUrl" placeholder="https://..." />
-              </div>
-
             </div>
 
             <div class="form-actions">
@@ -89,7 +83,6 @@ export function render(host) {
           </form>
 
         </div>
-
       </div>
     </div>
   `;
@@ -97,22 +90,48 @@ export function render(host) {
   // Refs
   const form = host.querySelector('#comp-form');
   const logoContainer = host.querySelector('#logo-container');
+  const fileInput = host.querySelector('#file-upload');
+  const btnTrigger = host.querySelector('#btn-trigger-upload');
   const dispName = host.querySelector('#display-name');
   const dispRut = host.querySelector('#display-rut');
   const selCurrency = form.elements.currency_code;
-  const inpLogo = form.elements.logoUrl;
 
-  // --- Lógica ---
+  // --- Lógica de Imagen (File Reader) ---
+
+  // Al hacer clic en el cuadro o el botón, abrir selector de archivos
+  const openFileSelector = () => fileInput.click();
+  logoContainer.addEventListener('click', openFileSelector);
+  btnTrigger.addEventListener('click', openFileSelector);
+
+  // Cuando se selecciona un archivo
+  fileInput.addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Validar tamaño (ej: Max 1MB)
+    if (file.size > 1024 * 1024) {
+        alert("La imagen es muy pesada. Máximo 1MB.");
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+        // Actualizamos la variable local y la vista
+        currentLogoBase64 = event.target.result; 
+        updateLogoView(currentLogoBase64);
+    };
+    reader.readAsDataURL(file); // Convertir a Base64
+  });
+
+  // --- Funciones de Carga y Guardado ---
 
   async function loadData() {
     try {
-      // Cargar monedas y datos de empresa USANDO APIFETCH SEGURO
       const [resComp, resCurr] = await Promise.all([
         apiFetch(API_URL),
         apiFetch(`${API_CURRENCIES}?$orderby=code asc`)
       ]);
 
-      // Llenar monedas
       if (resCurr.ok) {
         const dCurr = await resCurr.json();
         selCurrency.innerHTML = '<option value="">-- Seleccione --</option>';
@@ -124,20 +143,16 @@ export function render(host) {
         });
       }
 
-      // Llenar Formulario
       if (resComp.ok) {
         const data = await resComp.json();
         populateForm(data);
-      } else if (resComp.status === 404) {
-        // Si no existe (falló el seed), dejamos el form vacío para crear
-        console.warn('Empresa no configurada aún (ID 1 no encontrado).');
-        dispName.textContent = "Configuración Inicial";
-        dispRut.textContent = "Complete los datos";
+      } else {
+        dispName.textContent = "Nueva Empresa";
+        dispRut.textContent = "Complete datos";
       }
 
     } catch (err) {
       console.error(err);
-      alert('Error al cargar datos de empresa.');
     }
   }
 
@@ -148,27 +163,30 @@ export function render(host) {
     form.elements.contactEmail.value = data.contactEmail || '';
     form.elements.address.value = data.address || '';
     form.elements.currency_code.value = data.currency_code || '';
-    form.elements.logoUrl.value = data.logoUrl || '';
-
-    updatePreview(data.name, data.taxNumber, data.logoUrl);
+    
+    // Guardamos el logo que viene de la BD en la variable local
+    currentLogoBase64 = data.logoUrl || ''; 
+    
+    updateHeader(data.name, data.taxNumber);
+    updateLogoView(currentLogoBase64);
   }
 
-  function updatePreview(name, rut, url) {
-    dispName.textContent = name || 'Sin Nombre';
-    dispRut.textContent = rut || '---';
-
-    if (url) {
-      logoContainer.innerHTML = `<img src="${url}" alt="Logo" onerror="this.style.display='none'"/>`;
+  function updateLogoView(base64Str) {
+    if (base64Str) {
+      logoContainer.innerHTML = `<img src="${base64Str}" alt="Logo" style="width:100%; height:100%; object-fit:contain;" />`;
+      logoContainer.classList.add('has-logo');
     } else {
       logoContainer.innerHTML = `<span class="logo-placeholder">Sin Logo</span>`;
+      logoContainer.classList.remove('has-logo');
     }
   }
 
-  // Eventos
-  inpLogo.addEventListener('input', () => {
-    updatePreview(form.elements.name.value, form.elements.taxNumber.value, inpLogo.value);
-  });
-  
+  function updateHeader(name, rut) {
+    dispName.textContent = name || 'Sin Nombre';
+    dispRut.textContent = rut || '---';
+  }
+
+  // Evento live typing para actualizar título
   form.elements.name.addEventListener('input', () => {
     dispName.textContent = form.elements.name.value || 'Sin Nombre';
   });
@@ -186,18 +204,16 @@ export function render(host) {
       contactEmail: formData.get('contactEmail').trim(),
       address: formData.get('address').trim(),
       currency_code: formData.get('currency_code'),
-      logoUrl: formData.get('logoUrl').trim()
+      logoUrl: currentLogoBase64 // Enviamos el Base64 aquí
     };
 
     try {
-      // Intentamos hacer PUT (Actualizar) USANDO APIFETCH
       let res = await apiFetch(API_URL, {
         method: 'PUT',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify(payload)
       });
 
-      // Si falla con 404, hacemos POST (Crear ID 1) USANDO APIFETCH
       if (res.status === 404) {
         res = await apiFetch('/catalog/CompanySettings', {
           method: 'POST',
@@ -207,22 +223,13 @@ export function render(host) {
       }
 
       if (!res.ok) throw new Error(await res.text());
-
-      showToast('Datos de empresa guardados exitosamente');
+      alert('Datos guardados exitosamente');
       
     } catch (err) {
       console.error(err);
-      alert('Error al guardar: ' + err.message);
+      alert('Error: ' + err.message);
     }
   });
 
   loadData();
-}
-
-function showToast(msg) {
-  const div = document.createElement('div');
-  div.className = 'toast-success';
-  div.textContent = msg;
-  document.body.appendChild(div);
-  setTimeout(() => div.remove(), 3000);
 }

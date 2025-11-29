@@ -200,7 +200,7 @@ entity CompanySettings : managed {
   address      : String(200);
   contactEmail : String(120);
   currency     : Currency;              // Moneda base del sistema
-  logoUrl      : String(255);           // URL de la imagen del logo
+  logoUrl      : LargeString;
 }
 
 /**
