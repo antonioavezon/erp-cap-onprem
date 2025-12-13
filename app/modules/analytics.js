@@ -17,7 +17,7 @@ class SimpleChart {
         this.colorHistory = options.colorHistory || '#4caf50'; // Green
         this.colorProjection = options.colorProjection || '#2196f3'; // Blue
         this.height = options.height || 300;
-        this.padding = 40;
+        this.padding = 15; // Reduced from 40 to MAXIMIZE mobile space
     }
 
     render() {
