@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
   <meta charset="UTF-8" />
   <title>ERP CAP On-Prem – Módulos</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
+
   <script>
-    (function() {
+    (function () {
       // Si el token no existe, se expulsa inmediatamente.
       const token = sessionStorage.getItem('erp_token');
       if (!token) {
@@ -17,31 +18,87 @@
   </script>
 
   <link rel="stylesheet" href="styles.css" />
-  
+
   <style>
     /* Estilos Header Simples */
-    .shell-header-right { display: flex; align-items: center; font-size: 0.95rem; color: rgba(255, 255, 255, 0.9); }
-    .user-name-display { font-weight: 600; color: white; text-transform: capitalize; }
-    .logout-text-btn { background: none; border: none; color: #ffcccb; cursor: pointer; font-size: 0.95rem; font-family: inherit; text-decoration: underline; padding: 0; margin-left: 5px; }
-    .logout-text-btn:hover { color: white; }
+    .shell-header-right {
+      display: flex;
+      align-items: center;
+      font-size: 0.95rem;
+      color: rgba(255, 255, 255, 0.9);
+    }
+
+    .user-name-display {
+      font-weight: 600;
+      color: white;
+      text-transform: capitalize;
+    }
+
+    .logout-text-btn {
+      background: none;
+      border: none;
+      color: #ffcccb;
+      cursor: pointer;
+      font-size: 0.95rem;
+      font-family: inherit;
+      text-decoration: underline;
+      padding: 0;
+      margin-left: 5px;
+    }
+
+    .logout-text-btn:hover {
+      color: white;
+    }
+
     /* Estilos Toggle */
-    .shell-sidebar { transition: width 0.2s ease-in-out; }
-    .sidebar-logo { display: flex; align-items: center; justify-content: space-between; padding: 12px 8px 8px; border-bottom: 1px solid #e0e4ea; margin-bottom: 4px; }
-    .toggle-btn { width: 32px; height: 32px; background: none; border: none; font-size: 1.2rem; cursor: pointer; color: #0a6ed1; padding: 0; display: flex; align-items: center; justify-content: center; transition: transform 0.2s; }
-    .shell-sidebar.is-collapsed { width: 60px; }
+    .shell-sidebar {
+      transition: width 0.2s ease-in-out;
+    }
+
+    .sidebar-logo {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 8px 8px;
+      border-bottom: 1px solid #e0e4ea;
+      margin-bottom: 4px;
+    }
+
+    .toggle-btn {
+      width: 32px;
+      height: 32px;
+      background: none;
+      border: none;
+      font-size: 1.2rem;
+      cursor: pointer;
+      color: #0a6ed1;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.2s;
+    }
+
+    .shell-sidebar.is-collapsed {
+      width: 60px;
+    }
+
     .shell-sidebar.is-collapsed .logo-text,
     .shell-sidebar.is-collapsed .nav-item-sub,
-    .shell-sidebar.is-collapsed .nav-group summary { display: none; }
+    .shell-sidebar.is-collapsed .nav-group summary {
+      display: none;
+    }
   </style>
 </head>
+
 <body>
   <div class="shell">
-    
+
     <header class="shell-header">
       <div class="shell-header-left">
         <span class="app-title">ERP Optimus On-Prem</span>
       </div>
-      
+
       <div class="shell-header-right">
         <span class="user-name-display" id="header-username"></span><span>,&nbsp;</span>
         <button id="header-btn-logout" class="logout-text-btn">Cerrar sesión</button>
@@ -50,20 +107,21 @@
 
     <div class="shell-main">
       <nav class="shell-sidebar" id="shell-sidebar">
-        
+
         <div class="sidebar-logo">
           <span class="logo-text" id="sidebar-app-name">Menú Principal</span>
           <button id="menu-toggle" class="toggle-btn" title="Contraer">☰</button>
         </div>
 
         <div id="nav-items-container">
-          
+
           <button class="nav-item nav-item-home is-active" data-module="home" type="button">
             <span class="nav-item-title">Inicio</span>
             <span class="nav-item-sub">Resumen general</span>
           </button>
-          
-          <button class="nav-item nav-item-analytics" data-module="analytics" type="button" style="border-left: 3px solid #673ab7; margin-top:5px; background-color: #f3e5f5;">
+
+          <button class="nav-item nav-item-analytics" data-module="analytics" type="button"
+            style="border-left: 3px solid #673ab7; margin-top:5px; background-color: #f3e5f5;">
             <span class="nav-item-title" style="color:#673ab7; font-weight:bold;">Análisis de datos</span>
             <span class="nav-item-sub">Dashboards & Proyecciones</span>
           </button>
@@ -140,7 +198,8 @@
               <span class="nav-item-sub">OData Preview</span>
             </button>
           </details>
-        </div> </nav>
+        </div>
+      </nav>
 
       <main class="shell-content">
         <div class="content-header">
@@ -156,44 +215,51 @@
           </p>
 
           <div class="welcome-grid">
-            
-            <article class="welcome-card" data-module="analytics" role="button" tabindex="0" style="border-top: 4px solid #673ab7; grid-column: 1 / -1;">
+
+            <article class="welcome-card" data-module="analytics" role="button" tabindex="0"
+              style="border-top: 4px solid #673ab7; grid-column: 1 / -1;">
               <h2 style="color:#673ab7;">Análisis y Proyecciones</h2>
               <h3>Dashboard Ejecutivo</h3>
               <p>Visualización de ventas y compras con proyección a futuro.</p>
             </article>
-            
-            <article class="welcome-card" data-module="salesorders" role="button" tabindex="0" style="border-top: 4px solid #cc0000;">
+
+            <article class="welcome-card" data-module="salesorders" role="button" tabindex="0"
+              style="border-top: 4px solid #cc0000;">
               <h2 style="color:#cc0000;">Ventas</h2>
               <h3>Comercial</h3>
               <p>Generación de pedidos de venta.</p>
             </article>
-            
-            <article class="welcome-card" data-module="inventory" role="button" tabindex="0" style="border-top: 4px solid #3d9d4d;">
+
+            <article class="welcome-card" data-module="inventory" role="button" tabindex="0"
+              style="border-top: 4px solid #3d9d4d;">
               <h2 style="color:#3d9d4d;">Inventario</h2>
               <h3>Logística</h3>
               <p>Kardex y control de stock.</p>
             </article>
 
-            <article class="welcome-card" data-module="purchasing" role="button" tabindex="0" style="border-top: 4px solid #0056b3;">
+            <article class="welcome-card" data-module="purchasing" role="button" tabindex="0"
+              style="border-top: 4px solid #0056b3;">
               <h2 style="color:#0056b3;">Compras</h2>
               <h3>Aprovisionamiento</h3>
               <p>Gestión de proveedores y recepción.</p>
             </article>
 
-            <article class="welcome-card" data-module="employees" role="button" tabindex="0" style="border-top: 4px solid #9c27b0;">
+            <article class="welcome-card" data-module="employees" role="button" tabindex="0"
+              style="border-top: 4px solid #9c27b0;">
               <h2 style="color:#9c27b0;">RRHH</h2>
               <h3>Personal</h3>
               <p>Gestión de colaboradores y roles.</p>
             </article>
 
-            <article class="welcome-card" data-module="customers" role="button" tabindex="0" style="border-top: 4px solid #ff9800;">
+            <article class="welcome-card" data-module="customers" role="button" tabindex="0"
+              style="border-top: 4px solid #ff9800;">
               <h2 style="color:#ff9800;">Clientes</h2>
               <h3>Maestros</h3>
               <p>Base de datos maestra de clientes y datos comerciales.</p>
             </article>
 
-            <article class="welcome-card" data-module="products" role="button" tabindex="0" style="border-top: 4px solid #00bcd4;">
+            <article class="welcome-card" data-module="products" role="button" tabindex="0"
+              style="border-top: 4px solid #00bcd4;">
               <h2 style="color:#00bcd4;">Productos</h2>
               <h3>Maestros</h3>
               <p>Catálogo de productos y lista de materiales (BOM).</p>
@@ -206,14 +272,14 @@
     </div>
 
     <footer class="shell-footer">
-      <span>ERP CAP On-Prem &mdash; 2025 v1.0.0  Antonio Avezon S.</span>
+      <span>ERP CAP On-Prem &mdash; 2025 v1.0.0 Antonio Avezon S.</span>
       <span>CAP Node.js &bull; PostgreSQL on Docker &bull; Fiori preview</span>
     </footer>
   </div>
 
   <script type="module">
     // --- LÓGICA DE SESIÓN Y TOGGLE ---
-    
+
     function doLogout() {
       sessionStorage.clear();
       window.location.href = '/login.html';
@@ -222,29 +288,50 @@
     // 1. Manejo del Sidebar Toggle
     const sidebar = document.getElementById('shell-sidebar');
     const toggleButton = document.getElementById('menu-toggle');
-    
+
     let isCollapsed = false;
 
     toggleButton.addEventListener('click', () => {
       isCollapsed = !isCollapsed;
       sidebar.classList.toggle('is-collapsed', isCollapsed);
-      toggleButton.innerHTML = isCollapsed ? '>' : '☰'; 
+      toggleButton.innerHTML = isCollapsed ? '>' : '☰';
       toggleButton.title = isCollapsed ? 'Expandir' : 'Contraer';
-      
+
       if (isCollapsed) {
-          sidebar.querySelectorAll('.nav-group').forEach(group => group.open = false);
+        sidebar.querySelectorAll('.nav-group').forEach(group => group.open = false);
+      }
+      if (isCollapsed) {
+        sidebar.querySelectorAll('.nav-group').forEach(group => group.open = false);
       }
     });
+
+    // 1.1 Gestos Táctiles (Swipe to Collapse)
+    let touchStartX = 0;
+
+    sidebar.addEventListener('touchstart', (e) => {
+      touchStartX = e.changedTouches[0].screenX;
+    }, { passive: true });
+
+    sidebar.addEventListener('touchend', (e) => {
+      const touchEndX = e.changedTouches[0].screenX;
+      const diff = touchEndX - touchStartX;
+
+      // Si arrastra hacia la izquierda más de 50px y no está colapsado
+      if (diff < -50 && !isCollapsed) {
+        // Disparar click en el botón toggle para reutilizar la lógica
+        toggleButton.click();
+      }
+    }, { passive: true });
 
 
     // 2. Seguridad y Renderizado de UI (HEADER)
     const rawUser = sessionStorage.getItem('erp_user');
-    
+
     const formattedUser = rawUser ? (rawUser.charAt(0).toUpperCase() + rawUser.slice(1).toLowerCase()) : 'Usuario';
 
     document.getElementById('header-username').textContent = formattedUser;
     document.getElementById('welcome-user').textContent = formattedUser;
-    
+
     // Eventos Logout (Header es la única fuente de logout)
     document.getElementById('header-btn-logout').addEventListener('click', doLogout);
 
@@ -267,11 +354,11 @@
       analytics: { title: 'Análisis de Datos', loader: () => import('./modules/analytics.js') }
     };
 
-    const navItems     = document.querySelectorAll('.nav-item[data-module]');
-    const titleEl      = document.getElementById('content-title');
+    const navItems = document.querySelectorAll('.nav-item[data-module]');
+    const titleEl = document.getElementById('content-title');
     const welcomePanel = document.getElementById('welcome-panel');
-    const modulePanel  = document.getElementById('module-panel');
-    const backBtn      = document.getElementById('back-button');
+    const modulePanel = document.getElementById('module-panel');
+    const backBtn = document.getElementById('back-button');
 
     function setActiveNav(target) {
       navItems.forEach((btn) => btn.classList.remove('is-active'));
@@ -334,4 +421,5 @@
     backBtn.addEventListener('click', showHome);
   </script>
 </body>
+
 </html>
