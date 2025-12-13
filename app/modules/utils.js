@@ -26,3 +26,9 @@ export async function apiFetch(url, options = {}) {
 
   return response;
 }
+
+export async function getWithToken(url) {
+  const res = await apiFetch(url);
+  if (!res.ok) throw new Error(`Error ${res.status}: ${res.statusText}`);
+  return await res.json();
+}

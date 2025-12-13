@@ -1,0 +1,4 @@
+ID;rut;firstName;lastName;email;phone;role;isActive
+eee11111-1111-1111-1111-111111111111;15.111.222-3;Juan;Pérez;juan.perez@erp-demo.com;+56999887766;ADMIN;true
+eee22222-2222-2222-2222-222222222222;18.333.444-5;María;González;maria.gonzalez@erp-demo.com;+56955443322;SALES;true
+eee33333-3333-3333-3333-333333333333;12.555.666-7;Pedro;Tapia;pedro.tapia@erp-demo.com;+56911223344;WAREHOUSE;true

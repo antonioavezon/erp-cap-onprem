@@ -1,0 +1,4 @@
+ID;employee_ID;startDate;endDate;baseSalary;currency_code;afp;healthSystem;bankName;bankAccount;accountType
+ccc11111-1111-1111-1111-111111111111;eee11111-1111-1111-1111-111111111111;2024-01-01;;2500000;CLP;Modelo;Fonasa;Banco Estado;12345678;Vista
+ccc22222-2222-2222-2222-222222222222;eee22222-2222-2222-2222-222222222222;2024-02-15;;1200000;CLP;Habitat;Isapre Cruz Blanca;Banco Chile;00-999-88-7;Corriente
+ccc33333-3333-3333-3333-333333333333;eee33333-3333-3333-3333-333333333333;2024-03-01;;800000;CLP;Provida;Fonasa;Santander;55-444-33-2;Vista

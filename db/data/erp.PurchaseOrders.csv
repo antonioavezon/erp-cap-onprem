@@ -1,0 +1,2 @@
+ID;orderNo;supplier_ID;buyer_ID;orderDate;status;totalAmount;currency_code;notes
+poo11111-1111-1111-1111-111111111111;PO-2024-900;ssss1111-1111-1111-1111-111111111111;eee33333-3333-3333-3333-333333333333;2024-11-20;RECEIVED;5000;USD;Importación laptops

@@ -1,0 +1,4 @@
+ID;name;taxNumber;email;phone;street;city;postalCode;country_code;isActive
+aaaa1111-1111-1111-1111-111111111111;Empresa Demo SpA;76.123.456-7;contacto@empresa-demo.cl;+56912345678;Av. Providencia 1234;Santiago;7500000;CL;true
+bbbb2222-2222-2222-2222-222222222222;Servicios Financieros Ltda;77.999.888-K;finanzas@servicios.cl;+5622334455;Calle Ahumada 456;Santiago;8320000;CL;true
+cccc3333-3333-3333-3333-333333333333;Constructora del Sur;88.555.444-1;adquisiciones@constructora-sur.cl;+5641223344;Av. Paicaví 900;Concepción;4030000;CL;true

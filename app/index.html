@@ -62,6 +62,12 @@
             <span class="nav-item-title">Inicio</span>
             <span class="nav-item-sub">Resumen general</span>
           </button>
+          
+          <button class="nav-item nav-item-analytics" data-module="analytics" type="button" style="border-left: 3px solid #673ab7; margin-top:5px; background-color: #f3e5f5;">
+            <span class="nav-item-title" style="color:#673ab7; font-weight:bold;">Análisis de datos</span>
+            <span class="nav-item-sub">Dashboards & Proyecciones</span>
+          </button>
+
 
           <details class="nav-group" open>
             <summary>Maestros</summary>
@@ -150,6 +156,12 @@
           </p>
 
           <div class="welcome-grid">
+            
+            <article class="welcome-card" data-module="analytics" role="button" tabindex="0" style="border-top: 4px solid #673ab7; grid-column: 1 / -1;">
+              <h2 style="color:#673ab7;">Análisis y Proyecciones</h2>
+              <h3>Dashboard Ejecutivo</h3>
+              <p>Visualización de ventas y compras con proyección a futuro.</p>
+            </article>
             
             <article class="welcome-card" data-module="salesorders" role="button" tabindex="0" style="border-top: 4px solid #cc0000;">
               <h2 style="color:#cc0000;">Ventas</h2>
@@ -250,7 +262,9 @@
       salesorders: { title: 'Pedidos de venta', loader: () => import('./modules/salesorders.js') },
       salesitems: { title: 'Ítems de pedido', loader: () => import('./modules/salesitems.js') },
       company: { title: 'Configuración Empresa', loader: () => import('./modules/company.js') },
-      catalog: { title: 'Vista técnica', loader: () => import('./modules/tech.js') }
+      company: { title: 'Configuración Empresa', loader: () => import('./modules/company.js') },
+      catalog: { title: 'Vista técnica', loader: () => import('./modules/tech.js') },
+      analytics: { title: 'Análisis de Datos', loader: () => import('./modules/analytics.js') }
     };
 
     const navItems     = document.querySelectorAll('.nav-item[data-module]');
