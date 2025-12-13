@@ -10,8 +10,15 @@
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Header */
@@ -27,9 +34,11 @@
   flex: 1;
   overflow-y: auto;
   display: flex;
-  justify-content: center; /* Centrar la hoja */
+  justify-content: center;
+  /* Centrar la hoja */
   padding: 20px;
-  background-color: #f4f6f8; /* Fondo gris suave */
+  background-color: #f4f6f8;
+  /* Fondo gris suave */
 }
 
 /* Tarjeta tipo "Hoja" */
@@ -38,7 +47,7 @@
   width: 100%;
   max-width: 800px;
   border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   padding: 40px;
   display: flex;
   flex-direction: column;
@@ -105,7 +114,9 @@
   gap: 20px;
 }
 
-.full-width { grid-column: span 2; }
+.full-width {
+  grid-column: span 2;
+}
 
 .form-group {
   display: flex;
@@ -120,7 +131,8 @@
   text-transform: uppercase;
 }
 
-.form-group input, .form-group select {
+.form-group input,
+.form-group select {
   padding: 10px 12px;
   border: 1px solid #ccc;
   border-radius: 4px;
@@ -154,10 +166,23 @@
   transition: background 0.2s;
 }
 
-.btn.primary { background-color: #0056b3; color: white; }
-.btn.primary:hover { background-color: #004494; }
-.btn.secondary { background-color: #e9ecef; color: #495057; }
-.btn.secondary:hover { background-color: #dde2e6; }
+.btn.primary {
+  background-color: #0056b3;
+  color: white;
+}
+
+.btn.primary:hover {
+  background-color: #004494;
+}
+
+.btn.secondary {
+  background-color: #e9ecef;
+  color: #495057;
+}
+
+.btn.secondary:hover {
+  background-color: #dde2e6;
+}
 
 .logo-wrapper {
   display: flex;
@@ -176,7 +201,8 @@
   justify-content: center;
   overflow: hidden;
   background-color: #fafafa;
-  cursor: pointer; /* Indicar que es clickeable */
+  cursor: pointer;
+  /* Indicar que es clickeable */
   transition: border-color 0.2s;
   position: relative;
 }
@@ -205,7 +231,71 @@
 
 /* Toast */
 .toast-success {
-  position: fixed; bottom: 20px; right: 20px; background: #2e7d32; color: white;
-  padding: 12px 24px; border-radius: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 9999; animation: slideUp 0.3s;
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: #2e7d32;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 9999;
+  animation: slideUp 0.3s;
 }
-@keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+  .comp-card {
+    padding: 20px;
+  }
+
+  .card-header {
+    flex-direction: column;
+    text-align: center;
+    gap: 15px;
+  }
+
+  .logo-preview {
+    width: 60px;
+    /* Reducir a mitad (antes 120px) */
+    height: 60px;
+  }
+
+  .company-titles h2 {
+    font-size: 1.2rem;
+  }
+
+  /* Reducir letra */
+  .company-titles h4 {
+    font-size: 0.9rem;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* Stack columns */
+  .full-width {
+    grid-column: span 1;
+  }
+
+  .form-actions {
+    justify-content: center;
+  }
+
+  .btn {
+    width: 100%;
+  }
+}

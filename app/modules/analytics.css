@@ -2,6 +2,8 @@
     padding: 20px;
     max-width: 900px;
     margin: 0 auto;
+    overflow-x: hidden;
+    /* Prevent horizontal scroll on mobile */
 }
 
 .module-header {
@@ -24,14 +26,15 @@
 .dashboard-card {
     background: white;
     border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
     padding: 20px;
     margin-bottom: 30px;
-    border-left: 5px solid #ccc; /* Default */
+    border-left: 5px solid #ccc;
+    /* Default */
 }
 
 .dashboard-card:hover {
-    box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
     transform: translateY(-2px);
     transition: all 0.2s ease;
 }
@@ -56,8 +59,17 @@
     font-weight: bold;
     color: white;
 }
-.badge.sale { background-color: #2e7d32; } /* Verde */
-.badge.purchase { background-color: #0277bd; } /* Azul más claro o corporativo */
+
+.badge.sale {
+    background-color: #2e7d32;
+}
+
+/* Verde */
+.badge.purchase {
+    background-color: #0277bd;
+}
+
+/* Azul más claro o corporativo */
 
 .chart-container {
     width: 100%;
@@ -69,6 +81,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    direction: ltr;
+    /* FORCE LTR to prevent simple mirroring on some mobile browsers */
 }
 
 .stats-row {
@@ -95,8 +109,13 @@
     font-weight: bold;
 }
 
-.history-text { color: #2e7d32; }
-.projection-text { color: #1565c0; }
+.history-text {
+    color: #2e7d32;
+}
+
+.projection-text {
+    color: #1565c0;
+}
 
 .dashboard-divider {
     border: 0;
@@ -111,6 +130,39 @@
 }
 
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Mobile Responsive */
+@media (max-width: 768px) {
+    .module-header h2 {
+        font-size: 1.4rem;
+    }
+
+    .stats-row {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .stat-item {
+        padding-bottom: 10px;
+        border-bottom: 1px dashed #eee;
+    }
+
+    .stat-item:last-child {
+        border-bottom: none;
+    }
 }

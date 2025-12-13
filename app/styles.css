@@ -10,12 +10,15 @@ body {
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   color: #1b2834;
   background-color: #f4f7fb;
-  height: 100vh; /* CRÍTICO: Debe ocupar 100% del viewport */
-  overflow: hidden; /* CRÍTICO: Previene que el BODY haga scroll */
+  height: 100vh;
+  /* CRÍTICO: Debe ocupar 100% del viewport */
+  overflow: hidden;
+  /* CRÍTICO: Previene que el BODY haga scroll */
 }
 
 .shell {
-  height: 100%; /* CRÍTICO: Ocupa el 100% del body */
+  height: 100%;
+  /* CRÍTICO: Ocupa el 100% del body */
   display: flex;
   flex-direction: column;
 }
@@ -48,10 +51,12 @@ body {
 
 /* Contenido principal */
 .shell-main {
-  flex: 1; /* CRÍTICO: Ocupa todo el espacio vertical restante */
+  flex: 1;
+  /* CRÍTICO: Ocupa todo el espacio vertical restante */
   display: flex;
   min-height: 0;
-  overflow: hidden; /* CRÍTICO: Contenedor principal que previene el scroll de la página */
+  overflow: hidden;
+  /* CRÍTICO: Contenedor principal que previene el scroll de la página */
 }
 
 /* Sidebar */
@@ -63,8 +68,10 @@ body {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  overflow-y: auto; /* Permite scroll solo en la barra si hay muchos items */
-  flex-shrink: 0; /* Asegura que la barra no se encoja */
+  overflow-y: auto;
+  /* Permite scroll solo en la barra si hay muchos items */
+  flex-shrink: 0;
+  /* Asegura que la barra no se encoja */
 }
 
 .sidebar-logo {
@@ -126,7 +133,12 @@ body {
   cursor: pointer;
   display: flex;
   flex-direction: column;
+  flex-direction: column;
   gap: 2px;
+  overflow: hidden;
+  /* Prevent text overflow on collapse */
+  white-space: nowrap;
+  /* Keep text on one line */
 }
 
 .nav-item-home {
@@ -154,12 +166,14 @@ body {
 
 /* Zona central */
 .shell-content {
-  flex: 1; /* CRÍTICO: Ocupa el resto del espacio */
+  flex: 1;
+  /* CRÍTICO: Ocupa el resto del espacio */
   padding: 16px 24px;
   display: flex;
   flex-direction: column;
   min-height: 0;
-  overflow-y: auto; /* CRÍTICO: Solo el contenido debe desplazarse */
+  overflow-y: auto;
+  /* CRÍTICO: Solo el contenido debe desplazarse */
 }
 
 .content-header {
@@ -168,7 +182,8 @@ body {
   justify-content: space-between;
   gap: 16px;
   margin-bottom: 16px;
-  flex-shrink: 0; /* No se encoge al hacer scroll */
+  flex-shrink: 0;
+  /* No se encoge al hacer scroll */
 }
 
 .content-header h1 {
@@ -198,7 +213,8 @@ body {
   border-radius: 6px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   padding: 16px 20px 20px;
-  flex-shrink: 0; /* Asegura que la tarjeta inicial no se colapse */
+  flex-shrink: 0;
+  /* Asegura que la tarjeta inicial no se colapse */
 }
 
 .welcome-lead {
@@ -249,14 +265,41 @@ body {
   justify-content: space-between;
   border-top: 1px solid #d5dadd;
   background: #f7f9fb;
-  flex-shrink: 0; /* CRÍTICO: Fija el footer */
+  flex-shrink: 0;
+  /* CRÍTICO: Fija el footer */
 }
 
 /* Utilidades y Overrides */
-.hidden { display: none !important; }
+.hidden {
+  display: none !important;
+}
 
 /* Overrides para Header dinámico */
-.shell-header-right { display: flex; align-items: center; font-size: 0.95rem; color: rgba(255, 255, 255, 0.9); }
-.user-name-display { font-weight: 600; color: white; text-transform: capitalize; }
-.logout-text-btn { background: none; border: none; color: #ffcccb; cursor: pointer; font-size: 0.95rem; font-family: inherit; text-decoration: underline; padding: 0; margin-left: 5px; }
-.logout-text-btn:hover { color: white; }
+.shell-header-right {
+  display: flex;
+  align-items: center;
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.user-name-display {
+  font-weight: 600;
+  color: white;
+  text-transform: capitalize;
+}
+
+.logout-text-btn {
+  background: none;
+  border: none;
+  color: #ffcccb;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-family: inherit;
+  text-decoration: underline;
+  padding: 0;
+  margin-left: 5px;
+}
+
+.logout-text-btn:hover {
+  color: white;
+}
