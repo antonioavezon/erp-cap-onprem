@@ -72,7 +72,8 @@ class SimpleChart {
             svg.appendChild(circle);
 
             // Etiquetas Eje X
-            if (i % 2 === 0 || i === this.data.length - 1) { // Mostrar cada 2 para no saturar
+            // Fix: Strict alternating to prevent overlap (e.g. May + Jun)
+            if (i % 2 === 0) {
                 const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
                 text.setAttribute('x', x);
                 text.setAttribute('y', height - 10);

@@ -107,6 +107,25 @@ body {
   padding: 4px;
 }
 
+.shell-sidebar.is-collapsed .nav-item-sub,
+.shell-sidebar.is-collapsed .nav-group summary,
+.shell-sidebar.is-collapsed .nav-item-title {
+  display: none;
+}
+
+/* Mostrar nombre corto (data-module) cuando está colapsado para no dejar botones vacíos */
+.shell-sidebar.is-collapsed .nav-item::before {
+  content: attr(data-module);
+  display: block;
+  font-size: 9px;
+  text-transform: uppercase;
+  text-align: center;
+  width: 100%;
+  font-weight: bold;
+  color: #0a6ed1;
+  overflow: hidden;
+}
+
 .nav-group summary {
   list-style: none;
   cursor: pointer;
