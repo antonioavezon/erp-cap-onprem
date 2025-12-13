@@ -148,6 +148,16 @@
 
 /* Mobile Responsive */
 @media (max-width: 768px) {
+    .analytics-container {
+        padding: 8px;
+    }
+
+    /* Reduce main container padding */
+    .dashboard-card {
+        padding: 12px;
+    }
+
+    /* Reduce card padding */
     .module-header h2 {
         font-size: 1.4rem;
     }
