@@ -36,6 +36,7 @@ class SimpleChart {
         svg.style.overflow = 'visible';
 
         // Ejes
+        // Ajuste Ejes: Usar (N-1) para que el primer punto sea 0% y el último 100% del área útil
         const stepX = (width - this.padding * 2) / (this.data.length - 1);
         const scaleY = (val) => height - this.padding - ((val / maxVal) * (height - this.padding * 2));
 
