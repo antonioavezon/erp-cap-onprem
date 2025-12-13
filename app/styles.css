@@ -141,6 +141,32 @@ body {
   display: none;
 }
 
+/* Estilo especial para el grupo de Analytics */
+.special-group {
+  background-color: #f3e5f5;
+  margin-top: 8px;
+  border-left: 3px solid #673ab7;
+  padding: 0;
+}
+
+.special-group .nav-item {
+  background: transparent !important;
+  /* Force transparent to show group bg */
+}
+
+.special-group .nav-item-title {
+  color: #673ab7;
+  font-weight: bold;
+}
+
+/* Cuando colapsa, ocultar borde y fondo especial para que se vea uniforme */
+.shell-sidebar.is-collapsed .special-group {
+  background: transparent;
+  border-left: none;
+  margin-top: 4px;
+  /* Reset margin */
+}
+
 /* Botones de navegación */
 .nav-item {
   width: 100%;
