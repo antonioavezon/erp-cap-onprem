@@ -30,6 +30,9 @@ class SimpleChart {
         // Mobile Height Fix: User requested 1/2 height on mobile (150px vs 300px)
         const effectiveHeight = isMobile ? 150 : this.height;
 
+        // Restore maxVal calculation (Missing variable fix)
+        const maxVal = Math.max(...this.data.map(d => d.value)) * 1.1 || 100;
+
         const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
         svg.setAttribute('width', '100%');
         svg.setAttribute('height', effectiveHeight);
