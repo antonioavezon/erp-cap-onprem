@@ -148,7 +148,7 @@ export async function render(container) {
                 <span class="badge sale">Comercial</span>
             </div>
             <div class="card-body">
-                <div id="chart-sales" class="chart-container"></div>
+                <div id="chart-sales" class="chart-container" style="direction: ltr !important;"></div>
                 <div class="stats-row">
                     <div class="stat-item">
                         <span class="label">Total Histórico</span>
@@ -171,7 +171,7 @@ export async function render(container) {
                 <span class="badge purchase">Aprovisionamiento</span>
             </div>
             <div class="card-body">
-                <div id="chart-purchases" class="chart-container"></div>
+                <div id="chart-purchases" class="chart-container" style="direction: ltr !important;"></div>
                 <div class="stats-row">
                     <div class="stat-item">
                         <span class="label">Gasto Real</span>
