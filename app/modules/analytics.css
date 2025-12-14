@@ -159,8 +159,20 @@
     }
 
     /* Reduce card padding */
+    .dashboard-card {
+        padding: 12px;
+    }
+
     .chart-container {
         height: 150px;
+        /* Bleed effect: Counteract card padding to touch edges */
+        margin-left: -12px;
+        margin-right: -12px;
+        width: calc(100% + 24px);
+        border-radius: 0;
+        /* Remove corners for edge-to-edge */
+        border-left: none;
+        border-right: none;
     }
 
     /* Mobile Height based on user request */

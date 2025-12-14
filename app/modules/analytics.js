@@ -36,8 +36,8 @@ class SimpleChart {
         svg.setAttribute('viewBox', `0 0 ${width} ${effectiveHeight}`);
         svg.style.overflow = 'visible';
 
-        // Padding Adjust: Mobile needs to be tighter to use full width
-        const padding = isMobile ? 8 : this.padding;
+        // Padding Adjust: Mobile needs to be 0 to use full width (User Request)
+        const padding = isMobile ? 0 : this.padding;
 
         // Ejes
         // Ajuste Ejes: Usar (N-1) para que el primer punto sea 0% y el último 100% del área útil
