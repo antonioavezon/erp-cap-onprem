@@ -36,10 +36,13 @@ class SimpleChart {
         svg.setAttribute('viewBox', `0 0 ${width} ${effectiveHeight}`);
         svg.style.overflow = 'visible';
 
+        // Padding Adjust: Mobile needs to be tighter to use full width
+        const padding = isMobile ? 8 : this.padding;
+
         // Ejes
         // Ajuste Ejes: Usar (N-1) para que el primer punto sea 0% y el último 100% del área útil
-        const stepX = (width - this.padding * 2) / (this.data.length - 1);
-        const scaleY = (val) => effectiveHeight - this.padding - ((val / maxVal) * (effectiveHeight - this.padding * 2));
+        const stepX = (width - padding * 2) / (this.data.length - 1);
+        const scaleY = (val) => effectiveHeight - padding - ((val / maxVal) * (effectiveHeight - padding * 2));
 
         // Dibujar líneas
         let pathHistory = '';
@@ -54,7 +57,7 @@ class SimpleChart {
 
         // Generar Path Historia
         this.data.forEach((point, i) => {
-            const x = this.padding + (i * stepX);
+            const x = padding + (i * stepX);
             const y = scaleY(point.value);
 
             if (i === 0) pathHistory += `M ${x} ${y}`;
@@ -94,16 +97,15 @@ class SimpleChart {
         // Generar Path Proyección
         // Debe empezar desde el último punto de historia para continuidad visual
         if (lastHistoryIndex !== -1 && lastHistoryIndex < this.data.length - 1) {
-            const xABC = this.padding + (lastHistoryIndex * stepX);
+            const xABC = padding + (lastHistoryIndex * stepX);
             const yABC = scaleY(this.data[lastHistoryIndex].value);
             pathProjection += `M ${xABC} ${yABC}`;
 
             for (let i = lastHistoryIndex + 1; i < this.data.length; i++) {
-                const x = this.padding + (i * stepX);
-                const y = scaleY(point => scaleY(this.data[i].value)); // Bug fix logic refer
-                // Recalcular Y localmente porque closure
-                const yLocal = scaleY(this.data[i].value);
-                pathProjection += ` L ${x} ${yLocal}`;
+                const x = padding + (i * stepX);
+                // FIX: Removed syntax error here
+                const y = scaleY(this.data[i].value);
+                pathProjection += ` L ${x} ${y}`;
             }
         }
 
