@@ -187,4 +187,41 @@ export async function render(container) {
         console.error("Error cargando Analytics:", err);
         container.innerHTML += `<div class="error-msg" style="color:red; text-align:center;">Error cargando gráficos. Revise conexión.</div>`;
     }
+
+    // 6. Botón de Descarga CSV (Demo Feature)
+    // Inyectamos el botón al final
+    const footerCtx = document.createElement('div');
+    footerCtx.className = 'analytics-footer';
+    footerCtx.innerHTML = `
+        <button id="btn-download-csv" class="btn-download">
+            📥 Descargar Planilla de Datos (CSV)
+        </button>
+        <p class="footer-note">* Datos de demostración exportables a Excel</p>
+    `;
+    container.querySelector('.analytics-container').appendChild(footerCtx);
+
+    // Lógica de generación CSV
+    document.getElementById('btn-download-csv').addEventListener('click', () => {
+        const labels = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'];
+        // Reconstruimos datos unificados
+        const dataRows = labels.map((month, i) => {
+            const type = i < 4 ? 'Histórico' : 'Proyección';
+            // Ventas: Hist or Proj
+            const sale = i < 4 ? [8500000, 9200000, 12500000, 11000000][i] : [11000000, 13500000, 14200000][i - 3]; // Aproximado para demo
+            const purch = i < 4 ? [4500000, 5100000, 4800000, 6500000][i] : [6500000, 6200000, 5900000][i - 3];
+            return `${month},${type},${sale},${purch}`;
+        });
+
+        const csvContent = "Mes,Tipo_Dato,Ventas_CLP,Compras_CLP\n" + dataRows.join("\n");
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.setAttribute("href", url);
+        link.setAttribute("download", "reporte_financiero_demo.csv");
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    });
 }
