@@ -3,138 +3,24 @@ import { getWithToken } from './utils.js';
 /**
  * Módulo de Análisis de Datos (Analytics)
  * 
- * Muestra dashboards de Ventas y Compras con proyecciones.
- * Implementa una librería de gráficos ultra-liera basada en SVG sin dependencias externas.
+ * Implementación PROFESIONAL usando Chart.js (CDN).
+ * Garantiza respuesta móvil perfecta, tooltips y renderizado robusto.
  */
 
-/* =========================================================
-   LÓGICA DE GRÁFICOS (SVG)
-   ========================================================= */
-class SimpleChart {
-    constructor(container, options) {
-        this.container = container;
-        this.data = options.data || []; // Array of { label, value, type: 'history'|'projection' }
-        this.colorHistory = options.colorHistory || '#4caf50'; // Green
-        this.colorProjection = options.colorProjection || '#2196f3'; // Blue
-        this.height = options.height || 300;
-        this.padding = 15; // Reduced from 40 to MAXIMIZE mobile space
-    }
-
-    render() {
-        this.container.innerHTML = '';
-        if (!this.data.length) return;
-
-        const width = this.container.offsetWidth || 600;
-        const isMobile = window.innerWidth < 768;
-
-        // Mobile Height Fix: User requested 1/2 height on mobile (150px vs 300px)
-        const effectiveHeight = isMobile ? 150 : this.height;
-
-        // Restore maxVal calculation (Missing variable fix)
-        const maxVal = Math.max(...this.data.map(d => d.value)) * 1.1 || 100;
-
-        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-        svg.setAttribute('width', '100%');
-        svg.setAttribute('height', effectiveHeight);
-        svg.setAttribute('viewBox', `0 0 ${width} ${effectiveHeight}`);
-        svg.style.overflow = 'visible';
-
-        // Padding Adjust: Mobile needs to be 0 to use full width (User Request)
-        const padding = isMobile ? 0 : this.padding;
-
-        // Ejes
-        // Ajuste Ejes: Usar (N-1) para que el primer punto sea 0% y el último 100% del área útil
-        const stepX = (width - padding * 2) / (this.data.length - 1);
-        const scaleY = (val) => effectiveHeight - padding - ((val / maxVal) * (effectiveHeight - padding * 2));
-
-        // Dibujar líneas
-        let pathHistory = '';
-        let pathProjection = '';
-
-        // Encontrar punto de quiebre (donde termina historia y empieza proyección)
-        // Asumimos que la proyección continúa desde el último punto histórico
-        let lastHistoryIndex = -1;
-        for (let i = 0; i < this.data.length; i++) {
-            if (this.data[i].type === 'history') lastHistoryIndex = i;
+// Función auxiliar para cargar script externo
+function loadScript(src) {
+    return new Promise((resolve, reject) => {
+        if (document.querySelector(`script[src="${src}"]`)) {
+            resolve();
+            return;
         }
-
-        // Generar Path Historia
-        this.data.forEach((point, i) => {
-            const x = padding + (i * stepX);
-            const y = scaleY(point.value);
-
-            if (i === 0) pathHistory += `M ${x} ${y}`;
-            else if (i <= lastHistoryIndex) pathHistory += ` L ${x} ${y}`;
-
-            // Dibujar Puntos
-            const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-            circle.setAttribute('cx', x);
-            circle.setAttribute('cy', y);
-            circle.setAttribute('r', 4);
-            circle.setAttribute('fill', point.type === 'history' ? this.colorHistory : this.colorProjection);
-
-            // Tooltip simple
-            const title = document.createElementNS('http://www.w3.org/2000/svg', 'title');
-            title.textContent = `${point.label}: ${point.value.toLocaleString()}`;
-            circle.appendChild(title);
-            svg.appendChild(circle);
-
-            // Etiquetas Eje X
-            // Logic change: Show ALL labels. 
-            // PC: Full (Ene). Mobile: Short (E).
-            const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-            text.setAttribute('x', x);
-            text.setAttribute('y', effectiveHeight - 2); // Closer to bottom
-            text.setAttribute('text-anchor', 'middle');
-            text.setAttribute('font-size', '10');
-            text.setAttribute('fill', '#666');
-            text.setAttribute('font-weight', 'bold');
-
-            // Mobile: 1st letter only (E, F, M, A...)
-            // PC: Original label (Ene, Feb...)
-            text.textContent = isMobile ? point.label.charAt(0) : point.label;
-
-            svg.appendChild(text);
-        });
-
-        // Generar Path Proyección
-        // Debe empezar desde el último punto de historia para continuidad visual
-        if (lastHistoryIndex !== -1 && lastHistoryIndex < this.data.length - 1) {
-            const xABC = padding + (lastHistoryIndex * stepX);
-            const yABC = scaleY(this.data[lastHistoryIndex].value);
-            pathProjection += `M ${xABC} ${yABC}`;
-
-            for (let i = lastHistoryIndex + 1; i < this.data.length; i++) {
-                const x = padding + (i * stepX);
-                // FIX: Removed syntax error here
-                const y = scaleY(this.data[i].value);
-                pathProjection += ` L ${x} ${y}`;
-            }
-        }
-
-        // Agregar Paths al SVG
-        const lineH = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        lineH.setAttribute('d', pathHistory);
-        lineH.setAttribute('stroke', this.colorHistory);
-        lineH.setAttribute('stroke-width', '3');
-        lineH.setAttribute('fill', 'none');
-        svg.appendChild(lineH);
-
-        const lineP = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        lineP.setAttribute('d', pathProjection);
-        lineP.setAttribute('stroke', this.colorProjection);
-        lineP.setAttribute('stroke-width', '3');
-        lineP.setAttribute('stroke-dasharray', '5,5'); // Punteado para proyección
-        lineP.setAttribute('fill', 'none');
-        svg.appendChild(lineP);
-
-        this.container.appendChild(svg);
-    }
+        const script = document.createElement('script');
+        script.src = src;
+        script.onload = resolve;
+        script.onerror = reject;
+        document.head.appendChild(script);
+    });
 }
-
-/* =========================================================
-   LÓGICA DEL MÓDULO
-   ========================================================= */
 
 export async function render(container) {
     // 1. Inyectar CSS
@@ -143,7 +29,7 @@ export async function render(container) {
     link.href = 'modules/analytics.css';
     document.head.appendChild(link);
 
-    // 2. Estructura HTML
+    // 2. Estructura HTML (Limpiamos el contenedor primero)
     container.innerHTML = `
     <div class="analytics-container fade-in">
         <header class="module-header">
@@ -158,15 +44,18 @@ export async function render(container) {
                 <span class="badge sale">Comercial</span>
             </div>
             <div class="card-body">
-                <div id="chart-sales" class="chart-container" style="direction: ltr !important;"></div>
+                <!-- Usamos Canvas para Chart.js con altura fija controlada por CSS -->
+                <div class="chart-wrapper">
+                    <canvas id="chart-sales"></canvas>
+                </div>
                 <div class="stats-row">
                     <div class="stat-item">
                         <span class="label">Total Histórico</span>
-                        <strong class="value history-text" id="sales-total-hist">Cargando...</strong>
+                        <strong class="value history-text" id="sales-total-hist">...</strong>
                     </div>
                     <div class="stat-item">
-                        <span class="label">Proyección Q1</span>
-                        <strong class="value projection-text" id="sales-total-proj">Cargando...</strong>
+                        <span class="label">Proyección</span>
+                        <strong class="value projection-text" id="sales-total-proj">...</strong>
                     </div>
                 </div>
             </div>
@@ -181,15 +70,17 @@ export async function render(container) {
                 <span class="badge purchase">Aprovisionamiento</span>
             </div>
             <div class="card-body">
-                <div id="chart-purchases" class="chart-container" style="direction: ltr !important;"></div>
+                 <div class="chart-wrapper">
+                    <canvas id="chart-purchases"></canvas>
+                </div>
                 <div class="stats-row">
                     <div class="stat-item">
                         <span class="label">Gasto Real</span>
-                        <strong class="value history-text" id="purch-total-hist">Cargando...</strong>
+                        <strong class="value history-text" id="purch-total-hist">...</strong>
                     </div>
                     <div class="stat-item">
-                        <span class="label">Proyección Q1</span>
-                        <strong class="value projection-text" id="purch-total-proj">Cargando...</strong>
+                        <span class="label">Proyección</span>
+                        <strong class="value projection-text" id="purch-total-proj">...</strong>
                     </div>
                 </div>
             </div>
@@ -197,61 +88,103 @@ export async function render(container) {
     </div>
   `;
 
-    // 3. Obtener Datos Reales (Para mezclar)
-    // Intentamos obtener moneda de la empresa
-    let currency = 'CLP';
+    // 3. Cargar Chart.js y Datos
     try {
-        const settings = await getWithToken('/odata/v4/catalog/CompanySettings');
-        if (settings && settings.value && settings.value.length > 0) {
-            currency = settings.value[0].currency_code || 'CLP';
-        }
-    } catch (e) { console.warn('No settings found', e); }
+        await loadScript('https://cdn.jsdelivr.net/npm/chart.js');
 
-    // 4. Generar Datos DEMO (Mezcla de Realidad + Ficción para la Demo)
-    // Meses: Enero, Febrero, Marzo, Abril (Real), Mayo (Proj), Junio (Proj)
+        // Configuración Común
+        const isMobile = window.innerWidth < 768;
+        Chart.defaults.font.family = "system-ui, -apple-system, sans-serif";
+        Chart.defaults.color = "#666";
 
-    const salesData = [
-        { label: 'Ene', value: 8500000, type: 'history' },
-        { label: 'Feb', value: 9200000, type: 'history' },
-        { label: 'Mar', value: 12500000, type: 'history' },
-        { label: 'Abr', value: 11000000, type: 'history' }, // Asumimos mes actual con datos reales
-        { label: 'May', value: 13500000, type: 'projection' },
-        { label: 'Jun', value: 14200000, type: 'projection' }
-    ];
+        // Datos Demo
+        const labels = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'];
 
-    const purchData = [
-        { label: 'Ene', value: 4500000, type: 'history' },
-        { label: 'Feb', value: 5100000, type: 'history' },
-        { label: 'Mar', value: 4800000, type: 'history' },
-        { label: 'Abr', value: 6500000, type: 'history' },
-        { label: 'May', value: 6200000, type: 'projection' },
-        { label: 'Jun', value: 5900000, type: 'projection' }
-    ];
+        // Ventas
+        const salesDataHist = [8500000, 9200000, 12500000, 11000000, null, null];
+        const salesDataProj = [null, null, null, 11000000, 13500000, 14200000]; // Overlay start for continuity
 
-    // 5. Renderizar Gráficos
-    setTimeout(() => {
-        // Sales Chart
-        new SimpleChart(document.getElementById('chart-sales'), {
-            data: salesData,
-            colorHistory: '#2e7d32', // Verde
-            colorProjection: '#1565c0' // Azul
-        }).render();
+        // Compras
+        const purchDataHist = [4500000, 5100000, 4800000, 6500000, null, null];
+        const purchDataProj = [null, null, null, 6500000, 6200000, 5900000];
 
-        // Purchases Chart
-        new SimpleChart(document.getElementById('chart-purchases'), {
-            data: purchData,
-            colorHistory: '#2e7d32', // Verde
-            colorProjection: '#1565c0' // Azul
-        }).render();
+        // Función para crear gráficos
+        const createChart = (ctxId, dataH, dataP, label) => {
+            const ctx = document.getElementById(ctxId).getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: 'Histórico',
+                            data: dataH,
+                            borderColor: '#2e7d32', // Verde
+                            backgroundColor: '#2e7d32',
+                            tension: 0.3,
+                            fill: false,
+                            pointRadius: 4
+                        },
+                        {
+                            label: 'Proyección',
+                            data: dataP,
+                            borderColor: '#1565c0', // Azul
+                            backgroundColor: '#1565c0',
+                            borderDash: [5, 5],
+                            tension: 0.3,
+                            fill: false,
+                            pointRadius: 4
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false, // Importante para CSS height
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            callbacks: {
+                                label: function (context) {
+                                    return ' $' + context.parsed.y.toLocaleString('es-CL');
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function (value) {
+                                    return '$' + (value / 1000000).toFixed(1) + 'M';
+                                },
+                                font: { size: 10 }
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                font: { size: isMobile ? 10 : 12 }
+                            }
+                        }
+                    }
+                }
+            });
+        };
 
-        // Actualizar Totales Texto
-        const fmt = (val) => val.toLocaleString('es-CL', { style: 'currency', currency: currency });
+        // Renderizar
+        createChart('chart-sales', salesDataHist, salesDataProj, 'Ventas');
+        createChart('chart-purchases', purchDataHist, purchDataProj, 'Compras');
 
-        document.getElementById('sales-total-hist').textContent = fmt(salesData.filter(d => d.type === 'history').reduce((a, b) => a + b.value, 0));
-        document.getElementById('sales-total-proj').textContent = fmt(salesData.filter(d => d.type === 'projection').reduce((a, b) => a + b.value, 0));
+        // Totales Simples (Hardcoded sum for demo speed)
+        const fmt = (v) => v.toLocaleString('es-CL', { style: 'currency', currency: 'CLP' });
+        document.getElementById('sales-total-hist').textContent = fmt(41200000);
+        document.getElementById('sales-total-proj').textContent = fmt(27700000);
+        document.getElementById('purch-total-hist').textContent = fmt(20900000);
+        document.getElementById('purch-total-proj').textContent = fmt(12100000);
 
-        document.getElementById('purch-total-hist').textContent = fmt(purchData.filter(d => d.type === 'history').reduce((a, b) => a + b.value, 0));
-        document.getElementById('purch-total-proj').textContent = fmt(purchData.filter(d => d.type === 'projection').reduce((a, b) => a + b.value, 0));
-
-    }, 100);
+    } catch (err) {
+        console.error("Error cargando Analytics:", err);
+        container.innerHTML += `<div class="error-msg" style="color:red; text-align:center;">Error cargando gráficos. Revise conexión.</div>`;
+    }
 }
