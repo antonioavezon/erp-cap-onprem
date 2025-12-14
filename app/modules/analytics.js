@@ -25,20 +25,21 @@ class SimpleChart {
         if (!this.data.length) return;
 
         const width = this.container.offsetWidth || 600;
-        const height = this.height;
-        const maxVal = Math.max(...this.data.map(d => d.value)) * 1.1;
-        const minVal = 0;
+        const isMobile = window.innerWidth < 768;
+
+        // Mobile Height Fix: User requested 1/2 height on mobile (150px vs 300px)
+        const effectiveHeight = isMobile ? 150 : this.height;
 
         const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
         svg.setAttribute('width', '100%');
-        svg.setAttribute('height', height);
-        svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+        svg.setAttribute('height', effectiveHeight);
+        svg.setAttribute('viewBox', `0 0 ${width} ${effectiveHeight}`);
         svg.style.overflow = 'visible';
 
         // Ejes
         // Ajuste Ejes: Usar (N-1) para que el primer punto sea 0% y el último 100% del área útil
         const stepX = (width - this.padding * 2) / (this.data.length - 1);
-        const scaleY = (val) => height - this.padding - ((val / maxVal) * (height - this.padding * 2));
+        const scaleY = (val) => effectiveHeight - this.padding - ((val / maxVal) * (effectiveHeight - this.padding * 2));
 
         // Dibujar líneas
         let pathHistory = '';
@@ -73,17 +74,21 @@ class SimpleChart {
             svg.appendChild(circle);
 
             // Etiquetas Eje X
-            // Fix: Strict alternating to prevent overlap (e.g. May + Jun)
-            if (i % 2 === 0) {
-                const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-                text.setAttribute('x', x);
-                text.setAttribute('y', height - 10);
-                text.setAttribute('text-anchor', 'middle');
-                text.setAttribute('font-size', '10');
-                text.setAttribute('fill', '#666');
-                text.textContent = point.label;
-                svg.appendChild(text);
-            }
+            // Logic change: Show ALL labels. 
+            // PC: Full (Ene). Mobile: Short (E).
+            const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+            text.setAttribute('x', x);
+            text.setAttribute('y', effectiveHeight - 2); // Closer to bottom
+            text.setAttribute('text-anchor', 'middle');
+            text.setAttribute('font-size', '10');
+            text.setAttribute('fill', '#666');
+            text.setAttribute('font-weight', 'bold');
+
+            // Mobile: 1st letter only (E, F, M, A...)
+            // PC: Original label (Ene, Feb...)
+            text.textContent = isMobile ? point.label.charAt(0) : point.label;
+
+            svg.appendChild(text);
         });
 
         // Generar Path Proyección
